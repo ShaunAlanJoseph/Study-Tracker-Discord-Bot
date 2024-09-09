@@ -2,7 +2,9 @@
 .env
 temp*
 
+
 # Folders to Ignore
 .venv/
 local/
 __pycache__/
+.vscode/
