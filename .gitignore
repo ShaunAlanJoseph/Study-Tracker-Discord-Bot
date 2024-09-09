@@ -1,0 +1,8 @@
+# Files to Ignore
+.env
+temp*
+
+# Folders to Ignore
+.venv/
+local/
+__pycache__/
