@@ -63,10 +63,10 @@ def main():
     
     
     query = ("CREATE TABLE Songs("
-         "song_id BIGINT PRIMARY KEY,"
-         "bytes byeta NOT NULL,"
-         "artist VARCHAR(128)"
-         ")")
+      "song_id BIGINT PRIMARY KEY,"
+      "bytes bytea NOT NULL,"
+      "artist VARCHAR(128)"
+      ")")
     
     Database.execute_query(query)
     
