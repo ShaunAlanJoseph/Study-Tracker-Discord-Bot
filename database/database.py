@@ -12,7 +12,6 @@ class Database:
 
     @staticmethod
     def establish_connection():
-        print(DB_NAME, DB_USER, DB_PASS, DB_URL)
         Database.conn = psycopg2.connect(
             host=DB_URL,
             port=DB_PORT,
