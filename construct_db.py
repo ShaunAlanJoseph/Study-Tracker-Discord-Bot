@@ -26,7 +26,7 @@ def main():
     
     Database.execute_query(query)
     
-    query = ("CREATE TABLE TimeTableEntry("
+    query = ("CREATE TABLE Time_Table_Entry("
          "tt_id BIGINT PRIMARY KEY,"
          "user_id BIGINT NOT NULL,"
          "name VARCHAR(128) NOT NULL,"
@@ -40,18 +40,18 @@ def main():
     
     Database.execute_query(query)
     
-    query = ("CREATE TABLE TimeTableCompletedEntries("
+    query = ("CREATE TABLE Time_Table_Completed_Entries("
          "tt_id BIGINT,"
          "time BIGINT NOT NULL,"
          "status VARCHAR(32),"
          "PRIMARY KEY (tt_id, time),"
-         "FOREIGN KEY (tt_id) REFERENCES TimeTableEntry(tt_id)"
+         "FOREIGN KEY (tt_id) REFERENCES Time_Table_Entry(tt_id)"
          ")")
     
     Database.execute_query(query)
     
     
-    query = ("CREATE TABLE FocusMode("
+    query = ("CREATE TABLE Focus_Mode("
          "user_id BIGINT,"
          "start BIGINT NOT NULL,"
          "duration BIGINT,"
@@ -64,7 +64,7 @@ def main():
     
     query = ("CREATE TABLE Songs("
          "song_id BIGINT PRIMARY KEY,"
-         "bytes BLOB NOT NULL,"
+         "bytes byeta NOT NULL,"
          "artist VARCHAR(128)"
          ")")
     
@@ -78,7 +78,7 @@ def main():
     
     Database.execute_query(query)
     
-    query = ("CREATE TABLE PlaylistSongs("
+    query = ("CREATE TABLE Playlist_Songs("
          "playlist_id BIGINT,"
          "song_id BIGINT,"
          "PRIMARY KEY (playlist_id, song_id),"
@@ -99,7 +99,7 @@ def main():
     
     Database.execute_query(query)
     
-    query = ("CREATE TABLE DropdownCards("
+    query = ("CREATE TABLE Dropdown_Cards("
          "card_id BIGINT PRIMARY KEY,"
          "option VARCHAR(256),"
          "FOREIGN KEY (card_id) REFERENCES Cards(card_id)"
@@ -107,7 +107,7 @@ def main():
     
     Database.execute_query(query)
     
-    query = ("CREATE TABLE CardSet("
+    query = ("CREATE TABLE Card_Set("
          "card_set_id BIGINT PRIMARY KEY,"
          "user_id BIGINT NOT NULL,"
          "FOREIGN KEY (user_id) REFERENCES Users(user_id)"
@@ -115,17 +115,17 @@ def main():
     
     Database.execute_query(query)
     
-    query = ("CREATE TABLE CardSetCards("
+    query = ("CREATE TABLE Card_Set_Cards("
          "card_set_id BIGINT,"
          "card_id BIGINT,"
          "PRIMARY KEY (card_set_id, card_id),"
-         "FOREIGN KEY (card_set_id) REFERENCES CardSet(card_set_id),"
+         "FOREIGN KEY (card_set_id) REFERENCES Card_Set(card_set_id),"
          "FOREIGN KEY (card_id) REFERENCES Cards(card_id)"
          ")")
     
     Database.execute_query(query)
     
-    query = ("CREATE TABLE CardHistory("
+    query = ("CREATE TABLE Card_History("
          "card_id BIGINT,"
          "user_id BIGINT,"
          "time BIGINT,"
