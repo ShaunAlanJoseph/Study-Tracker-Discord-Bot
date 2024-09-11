@@ -93,7 +93,7 @@ Users (user_id (PK), username, join_date) // Strong Entity
   
 ### ER Diagram:
 
-https://discord.com/channels/1273219520860913676/1273219520860913679/1283350650960478229
+https://cdn.discordapp.com/attachments/1273219520860913679/1283350650717077567/Drawing_2024-08-30_10.32.29.excalidraw.png?ex=66e2acee&is=66e15b6e&hm=88ac4e2f0ca14870ba2cd94cf0034239f3ed948880c867c4dd8c011fddbc7616&
 
 
 ### Logical Design:
