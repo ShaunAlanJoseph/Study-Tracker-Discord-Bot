@@ -3,13 +3,22 @@ from database import Database
 
 def main():
     Database().establish_connection()
-
+    
+    table_list = ["Users", "Tasks", "Time_Table", "Time_Table_Status", "Focus_Mode", "Songs", "Playlist", "Playlist_Songs", "Flashcard", "Flashcard_Set", "Flashcard_set_access", "Flashcard_Set_Cards", "Flashcard_History"]
+    
+    for table in table_list:
+            query = ("DROP TABLE IF EXISTS " + table + " CASCADE")
+            Database.execute_query(query)
+    
     # Create Relations
-
-    query = ("CREATE TABLE USERS("
+    
+    query = ("CREATE TABLE Users("
              "user_id BIGINT PRIMARY KEY,"
-             "username VARCHAR(64) NOT NULL,"
-             "join_date BIGINT NOT NULL"
+             "name VARCHAR(64) NOT NULL,"
+             "join_date BIGINT NOT NULL,"
+             "dob BIGINT,"
+             "institution VARCHAR(256),"
+             "time_zone SMALLINT"
              ")")
     Database.execute_query(query)
     
@@ -26,26 +35,27 @@ def main():
     
     Database.execute_query(query)
     
-    query = ("CREATE TABLE Time_Table_Entry("
-         "tt_id BIGINT PRIMARY KEY,"
+    query = ("CREATE TABLE Time_Table("
+         "tt_id INT PRIMARY KEY,"
          "user_id BIGINT NOT NULL,"
          "name VARCHAR(128) NOT NULL,"
          "description TEXT,"
-         "days VARCHAR(64),"
-         "time BIGINT,"
-         "duration BIGINT,"
-         "ping BOOLEAN,"
+         "days SMALLINT NOT NULL,"
+         "time SMALLINT NOT NULL,"
+         "duration SMALLINT,"
+         "ping BOOLEAN NOT NULL,"
+         "active BOOLEAN NOT NULL,"
          "FOREIGN KEY (user_id) REFERENCES Users(user_id)"
          ")")
     
     Database.execute_query(query)
     
-    query = ("CREATE TABLE Time_Table_Completed_Entries("
-         "tt_id BIGINT,"
+    query = ("CREATE TABLE Time_Table_Status("
+         "tt_id INT NOT NULL,"
          "time BIGINT NOT NULL,"
          "status VARCHAR(32),"
          "PRIMARY KEY (tt_id, time),"
-         "FOREIGN KEY (tt_id) REFERENCES Time_Table_Entry(tt_id)"
+         "FOREIGN KEY (tt_id) REFERENCES Time_Table(tt_id)"
          ")")
     
     Database.execute_query(query)
@@ -53,9 +63,9 @@ def main():
     
     query = ("CREATE TABLE Focus_Mode("
          "user_id BIGINT,"
-         "start BIGINT NOT NULL,"
-         "duration BIGINT,"
-         "PRIMARY KEY (user_id, start),"
+         "start_time BIGINT NOT NULL,"
+         "duration BIGINT NOT NULL,"
+         "PRIMARY KEY (user_id, start_time),"
          "FOREIGN KEY (user_id) REFERENCES Users(user_id)"
          ")")
     
@@ -63,24 +73,27 @@ def main():
     
     
     query = ("CREATE TABLE Songs("
-      "song_id BIGINT PRIMARY KEY,"
+      "song_id INT PRIMARY KEY,"
+      "user_id BIGINT NOT NULL,"
       "bytes bytea NOT NULL,"
-      "artist VARCHAR(128)"
+      "artist VARCHAR(64) NOT NULL,"
+      "FOREIGN KEY (user_id) REFERENCES Users(user_id)"
       ")")
     
     Database.execute_query(query)
     
     query = ("CREATE TABLE Playlist("
-         "playlist_id BIGINT PRIMARY KEY,"
+         "playlist_id INT PRIMARY KEY,"
          "user_id BIGINT NOT NULL,"
+         "description TEXT,"
          "FOREIGN KEY (user_id) REFERENCES Users(user_id)"
          ")")
     
     Database.execute_query(query)
     
     query = ("CREATE TABLE Playlist_Songs("
-         "playlist_id BIGINT,"
-         "song_id BIGINT,"
+         "playlist_id INT,"
+         "song_id INT,"
          "PRIMARY KEY (playlist_id, song_id),"
          "FOREIGN KEY (playlist_id) REFERENCES Playlist(playlist_id),"
          "FOREIGN KEY (song_id) REFERENCES Songs(song_id)"
@@ -88,50 +101,55 @@ def main():
     
     Database.execute_query(query)
     
-    query = ("CREATE TABLE Cards("
-         "card_id BIGINT PRIMARY KEY,"
+    query = ("CREATE TABLE Flashcard("
+         "card_id INT PRIMARY KEY,"
          "user_id BIGINT NOT NULL,"
-         "question TEXT,"
+         "question TEXT NOT NULL,"
+         "options TEXT[],"
          "answer TEXT,"
-         "card_type VARCHAR(64),"
          "FOREIGN KEY (user_id) REFERENCES Users(user_id)"
          ")")
     
     Database.execute_query(query)
     
-    query = ("CREATE TABLE Dropdown_Cards("
-         "card_id BIGINT PRIMARY KEY,"
-         "option VARCHAR(256),"
-         "FOREIGN KEY (card_id) REFERENCES Cards(card_id)"
+        
+    query = ("CREATE TABLE Flashcard_Set("
+         "card_set_id INT PRIMARY KEY,"
+         "owner BIGINT NOT NULL,"
+         "description TEXT,"
+         "FOREIGN KEY (owner) REFERENCES Users(user_id)"
          ")")
     
     Database.execute_query(query)
     
-    query = ("CREATE TABLE Card_Set("
-         "card_set_id BIGINT PRIMARY KEY,"
-         "user_id BIGINT NOT NULL,"
-         "FOREIGN KEY (user_id) REFERENCES Users(user_id)"
-         ")")
+    query = ("CREATE TABLE Flashcard_set_access("
+           "card_set_id INT,"
+           "user_id BIGINT,"
+           "PRIMARY KEY (card_set_id, user_id),"
+           "FOREIGN KEY (card_set_id) REFERENCES Flashcard_Set(card_set_id),"
+           "FOREIGN KEY (user_id) REFERENCES Users(user_id)"
+             ")")
     
     Database.execute_query(query)
     
-    query = ("CREATE TABLE Card_Set_Cards("
-         "card_set_id BIGINT,"
-         "card_id BIGINT,"
+    query = ("CREATE TABLE Flashcard_Set_Cards("
+         "card_set_id INT,"
+         "card_id INT,"
+         "added_by BIGINT NOT NULL,"
          "PRIMARY KEY (card_set_id, card_id),"
-         "FOREIGN KEY (card_set_id) REFERENCES Card_Set(card_set_id),"
-         "FOREIGN KEY (card_id) REFERENCES Cards(card_id)"
+         "FOREIGN KEY (card_set_id) REFERENCES Flashcard_Set(card_set_id),"
+         "FOREIGN KEY (card_id) REFERENCES Flashcard(card_id)"
          ")")
     
     Database.execute_query(query)
     
-    query = ("CREATE TABLE Card_History("
-         "card_id BIGINT,"
+    query = ("CREATE TABLE Flashcard_History("
+         "card_id INT,"
          "user_id BIGINT,"
          "time BIGINT,"
          "status VARCHAR(32),"
          "PRIMARY KEY (card_id, user_id, time),"
-         "FOREIGN KEY (card_id) REFERENCES Cards(card_id),"
+         "FOREIGN KEY (card_id) REFERENCES Flashcard(card_id),"
          "FOREIGN KEY (user_id) REFERENCES Users(user_id)"
          ")")
     
