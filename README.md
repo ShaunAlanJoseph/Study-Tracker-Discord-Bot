@@ -93,8 +93,7 @@ Users (user_id (PK), username, join_date) // Strong Entity
   
 ### ER Diagram:
 
-![Uploading image.png…]()
-
+<img src = "./images/er-diagram.png" >
 
 
 ### Logical Design:
