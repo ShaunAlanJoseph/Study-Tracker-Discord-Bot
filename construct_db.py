@@ -78,7 +78,7 @@ def main():
     
     Database.execute_query(query)
     
-    query = ("CREATE TABLE Playlist_Songs("
+    query = ("CREATE TABLE SongEntry("
          "playlist_id BIGINT,"
          "song_id BIGINT,"
          "PRIMARY KEY (playlist_id, song_id),"
@@ -115,7 +115,7 @@ def main():
     
     Database.execute_query(query)
     
-    query = ("CREATE TABLE Card_Set_Cards("
+    query = ("CREATE TABLE CardEntry("
          "card_set_id BIGINT,"
          "card_id BIGINT,"
          "PRIMARY KEY (card_set_id, card_id),"
@@ -127,12 +127,10 @@ def main():
     
     query = ("CREATE TABLE Card_History("
          "card_id BIGINT,"
-         "user_id BIGINT,"
          "time BIGINT,"
          "status VARCHAR(32),"
          "PRIMARY KEY (card_id, user_id, time),"
-         "FOREIGN KEY (card_id) REFERENCES Cards(card_id),"
-         "FOREIGN KEY (user_id) REFERENCES Users(user_id)"
+         "FOREIGN KEY (card_id) REFERENCES Cards(card_id)"
          ")")
     
     Database.execute_query(query)
