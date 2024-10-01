@@ -205,24 +205,7 @@ DELETE FROM Tasks WHERE task_id = ?;
 ```
 However in this project these operations are performed internally by discord through the python functions we have written
 
-### Stored Procedures and Triggers:
-Implemented stored procedures, functions, and triggers 
-```sql
-CREATE OR REPLACE FUNCTION update_task_status()
-RETURNS TRIGGER AS $$
-BEGIN
-    IF NEW.status = 'completed' THEN
-        NEW.completion_time = EXTRACT(EPOCH FROM NOW());
-    END IF;
-    RETURN NEW;
-END;
-$$ LANGUAGE plpgsql;
-
-CREATE TRIGGER task_status_update
-BEFORE UPDATE ON Tasks
-FOR EACH ROW
-EXECUTE FUNCTION update_task_status();
-```
+ 
 
 ### User Interface (UI) Design:
   For this project, the UI is implemented as a Discord bot using the `discord.py` library.
