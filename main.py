@@ -5,7 +5,8 @@ from logging import info
 
 from config import DISCORD_API_TOKEN, ADMIN_CHANNEL_ID
 from database import Database
-from study_tracker_cog import StudyTrackerCog
+from cogs.study_tracker_cog import StudyTrackerCog
+from cogs.GeminiCog import GeminiAgent
 
 
 async def main():
@@ -13,6 +14,7 @@ async def main():
 
     bot = commands.Bot(command_prefix="$", intents=Intents.all())
     await bot.add_cog(StudyTrackerCog(bot))
+    await bot.add_cog(GeminiAgent(bot))
 
     @bot.event
     async def on_ready():  # type: ignore
