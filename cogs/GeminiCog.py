@@ -1,6 +1,7 @@
 from config import Gemini_API_Key
 from discord.ext import commands
 import google.generativeai as genai
+import time
 
 genai.configure(api_key=Gemini_API_Key)
 DISCORD_MAX_MESSAGE_LENGTH=2000
@@ -63,12 +64,18 @@ class GeminiAgent(commands.Cog):
         dmchannel = await ctx.author.create_dm()
         await dmchannel.send('Hi how can I help you today?')
 
-    def gemini_generate_content(self,content):
-        try:
-            response = self.model.generate_content(content,stream=True)
-            return response
-        except Exception as e:
-            return PLEASE_TRY_AGAIN_ERROR_MESSAGE + str(e)
+    def gemini_generate_content(self, content, retries=4, delay=2):
+        attempt = 0
+        while attempt < retries:
+            try:
+                response = self.model.generate_content(content, stream=True)
+                return response
+            except Exception as e:
+                print(f"Attempt {attempt + 1}: error in gemini_generate_content:", e)
+                if attempt < retries - 1:
+                    time.sleep(delay)
+                attempt += 1
+        return PLEASE_TRY_AGAIN_ERROR_MESSAGE + str(e)
         
     async def send_message_in_chunks(self,ctx,response):
         message = ""
