@@ -23,14 +23,13 @@ def main():
     Database.execute_query(query)
     
     query = ("CREATE TABLE Tasks("
-         "task_id BIGINT PRIMARY KEY,"
+         "task_id SERIAL PRIMARY KEY,"
          "user_id BIGINT NOT NULL,"
          "name VARCHAR(128) NOT NULL,"
          "description TEXT,"
          "status VARCHAR(32),"
          "due_date BIGINT,"
-         "completion_time BIGINT,"
-         "FOREIGN KEY (user_id) REFERENCES Users(user_id)"
+         "completion_time BIGINT"
          ")")
     
     Database.execute_query(query)
@@ -107,7 +106,7 @@ def main():
          "question TEXT NOT NULL,"
          "options TEXT[],"
          "answer TEXT,"
-         "image BYTEA"
+         "image BYTEA,"
          "FOREIGN KEY (user_id) REFERENCES Users(user_id)"
          ")")
     
