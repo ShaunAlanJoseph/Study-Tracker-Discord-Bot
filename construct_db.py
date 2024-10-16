@@ -102,11 +102,12 @@ def main():
     Database.execute_query(query)
     
     query = ("CREATE TABLE Flashcard("
-         "card_id INT PRIMARY KEY,"
+         "card_id VARCHAR(12) PRIMARY KEY,"
          "user_id BIGINT NOT NULL,"
          "question TEXT NOT NULL,"
          "options TEXT[],"
          "answer TEXT,"
+         "image BYTEA"
          "FOREIGN KEY (user_id) REFERENCES Users(user_id)"
          ")")
     
@@ -134,7 +135,7 @@ def main():
     
     query = ("CREATE TABLE Flashcard_Set_Cards("
          "card_set_id INT,"
-         "card_id INT,"
+         "card_id VARCHAR(12),"
          "added_by BIGINT NOT NULL,"
          "PRIMARY KEY (card_set_id, card_id),"
          "FOREIGN KEY (card_set_id) REFERENCES Flashcard_Set(card_set_id),"
@@ -144,7 +145,7 @@ def main():
     Database.execute_query(query)
     
     query = ("CREATE TABLE Flashcard_History("
-         "card_id INT,"
+         "card_id VARCHAR(12),"
          "user_id BIGINT,"
          "time BIGINT,"
          "status VARCHAR(32),"

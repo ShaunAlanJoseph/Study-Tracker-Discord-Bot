@@ -1,6 +1,6 @@
 import psycopg2
 from psycopg2._psycopg import connection
-from logging import info
+from logging import info, error
 from typing import Any, List, Optional, Tuple
 
 from config import DB_URL, DB_PORT, DB_NAME, DB_USER, DB_PASS
@@ -35,24 +35,35 @@ class Database:
     @staticmethod
     def get_cursor():
         return Database.get_connection().cursor()
+    
+    @staticmethod
+    def commit():
+        conn = Database.get_connection()
+        conn.commit()
 
     @staticmethod
-    def execute_query(query: str):
-        with Database.get_cursor() as cur:
-            cur.execute(query)
-        Database.get_connection().commit()
+    def execute_query(query: str, *args: Any):
+        try:
+            with Database.get_cursor() as cur:
+                cur.execute(query, args)
+            Database.commit()
+        except Exception as exc:
+            error(f"exc: {exc}\nquery: {query}", exc_info=True)
 
     @staticmethod
-    def fetch_all(query: str) -> List[Tuple[Any, ...]]:
+    def fetch_many(query: str, *args: Any) -> List[Tuple[Any, ...]]:
         with Database.get_cursor() as cur:
-            cur.execute(query)
+            cur.execute(query, args)
             result = cur.fetchall()
             return result
 
     @staticmethod
-    def fetch_one(query: str) -> Tuple[Any, ...]:
+    def fetch_one(query: str, *args: Any) -> Tuple[Any, ...]:
+        """
+        :raises ValueError: if no result is found
+        """
         with Database.get_cursor() as cur:
-            cur.execute(query)
+            cur.execute(query, args)
             result = cur.fetchone()
             if result is None:
                 raise ValueError("No result found")

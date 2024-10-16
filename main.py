@@ -1,20 +1,25 @@
 from asyncio import run
 from discord import Intents
 from discord.ext import commands
-from logging import info
+from logging import info, getLogger, INFO
 
 from config import DISCORD_API_TOKEN, ADMIN_CHANNEL_ID
 from database import Database
 from cogs.study_tracker_cog import StudyTrackerCog
 from cogs.GeminiCog import GeminiAgent
+from utils.context_manager import ContextManager
 
 
 async def main():
+    getLogger().setLevel(INFO)
+
     Database.establish_connection()
 
     bot = commands.Bot(command_prefix="$", intents=Intents.all())
     await bot.add_cog(StudyTrackerCog(bot))
     await bot.add_cog(GeminiAgent(bot))
+
+    ContextManager.setup_context_manager()
 
     @bot.event
     async def on_ready():  # type: ignore

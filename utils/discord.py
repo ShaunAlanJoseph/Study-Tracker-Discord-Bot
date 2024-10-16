@@ -1,4 +1,15 @@
-from discord import Interaction, Message, Embed, ui, File, NotFound, ButtonStyle
+from discord import (
+    Interaction,
+    Message,
+    Embed,
+    ui,
+    File,
+    NotFound,
+    ButtonStyle,
+    Color,
+    AllowedMentions,
+)
+from io import BytesIO
 from typing import Optional, List, Tuple, Any, Dict, Self, Protocol, TYPE_CHECKING
 from utils.context_manager import ctx_mgr
 from logging import error as err, info
@@ -25,6 +36,14 @@ async def get_user(user_id: int):
         raise ValueError(f"Invalid user_id: `{user_id}` doesn't exist.")
 
 
+async def get_files_from_message(message: Message) -> Dict[str, BytesIO]:
+    files: Dict[str, BytesIO] = {}
+    for file in message.attachments:
+        file_bytes = await file.read()
+        files[file.filename] = BytesIO(file_bytes)
+    return files
+
+
 async def send_message(
     *,
     content: Optional[str] = None,
@@ -41,21 +60,61 @@ async def send_message(
     if file is not None:
         files.append(file)
 
-    kwargs: Dict[str, Any] = {}
-    for kwarg in ["embed", "view", "files", "mention_author"]:
-        if locals()[kwarg] is not None:
-            kwargs[kwarg] = locals()[kwarg]
+    if embed is not None and hasattr(embed, "file"):
+        if embed.file is not None:  # type: ignore
+            files.append(embed.file)  # type: ignore
 
     if message is None or send_new_message:
+        kwargs: Dict[str, Any] = {}
+        for kwarg in ["embed", "view", "files", "mention_author"]:
+            if locals()[kwarg] is not None:
+                kwargs[kwarg] = locals()[kwarg]
+
         ctx = ctx_mgr().get_init_context()
         message = await ctx.reply(content=content, **kwargs)
 
     else:
-        del kwargs["files"]
-        kwargs["attachments"] = files
-        message = await message.edit(content=content)
+        allowed_mentions = (
+            AllowedMentions.all() if mention_author else AllowedMentions.none()
+        )
+        message = await message.edit(
+            content=content,
+            embed=embed,
+            view=view,
+            attachments=files,
+            allowed_mentions=allowed_mentions,
+        )
 
     ctx_mgr().set_active_msg(message)
+
+
+class BaseEmbed(Embed):
+    def __init__(
+        self,
+        *,
+        title: str,
+        description: Optional[str] = None,
+        color: Tuple[int, int, int] = (0, 255, 255),
+    ):
+        if description is None:
+            user_id = ctx_mgr().get_context_user_id()
+            description = f"<@{user_id}>"
+        super().__init__(
+            title=title, description=description, color=Color.from_rgb(*color)
+        )
+        self.file: Optional[File] = None
+
+    def add_field(self, *, name: str, value: str = "", inline: bool = False):  # type: ignore
+        super().add_field(name=name, value=value, inline=inline)
+
+    def set_image_from_bytes(self, b: bytes, filename: str = "img.png"):
+        buf = BytesIO(b)
+        buf.seek(0)
+        self.file = File(buf, filename=filename)
+        self.set_image_from_file(self.file.filename)
+
+    def set_image_from_file(self, filename: str):
+        self.set_image(url=f"attachment://{filename}")
 
 
 class BaseView(ui.View):
@@ -132,9 +191,15 @@ class BaseView(ui.View):
 
     async def send(self):
         embed, files = await self.get_embed_files()
-        self._active_message = await send_message(
+        await send_message(
             content=self.msg_content, embed=embed, view=self, files=files
         )
+        self._active_message = ctx_mgr().get_active_msg()
+
+    async def update_view(self):
+        self.clear_items()
+        self._add_items()
+        await self.send()
 
     def _add_button(
         self,
