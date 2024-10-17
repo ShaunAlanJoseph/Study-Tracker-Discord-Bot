@@ -26,7 +26,7 @@ def epoch_to_date(epoch):
 
 class Task:
     
-    def __init__(self,name="",task_id=None,description=None,status="pending",due_date=None,completion_time=None):
+    def __init__(self,name="",task_id=0,description=None,status="pending",due_date=None,completion_time=None):
         self.user_id= ctx_mgr().get_context_user_id()
         self.task_id = task_id
         self.name = name
@@ -57,8 +57,14 @@ class Task:
         Database.execute_query(query, self.task_id)
 
     def delete_task(self):
-        query = ("DELETE FROM Tasks WHERE task_id=%s")
-        Database.execute_query(query, self.task_id)
+        try:
+            query = ("DELETE FROM Tasks WHERE task_id=%s")
+            Database.execute_query(query, self.task_id)
+        except Exception as e:
+            print(f"Task id: {self.task_id} not found")
+            print("Sql query failed")
+            print(e)
+            return False
 
 
 async def list_tasks():

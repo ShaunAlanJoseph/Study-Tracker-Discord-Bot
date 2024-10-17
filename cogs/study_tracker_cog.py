@@ -101,7 +101,7 @@ class StudyTrackerCog(Cog):
     @command(name="remove_task")
     async def remove_task(self, ctx: Context[Bot],*,name: str):
         from modules.tasks import remove_task
-        query=("SELECT task_id FROM Tasks WHERE name=%s")[0]
+        query=("SELECT task_id FROM Tasks WHERE name=%s")
         id=Database.fetch_one(query,name)
         ctx_mgr().set_init_context(ctx)
         await remove_task(id)
@@ -183,7 +183,7 @@ class StudyTrackerCog(Cog):
         }
 
         for command_name, description in commands_info.items():
-            embed.add_field(name=f"!{command_name}", value=description, inline=False)
+            embed.add_field(name=f"${command_name}", value=description, inline=False)
 
         await ctx.send(embed=embed)
  
