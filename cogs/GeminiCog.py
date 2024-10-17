@@ -75,7 +75,7 @@ class GeminiAgent(commands.Cog):
                 if attempt < retries - 1:
                     time.sleep(delay)
                 attempt += 1
-        return PLEASE_TRY_AGAIN_ERROR_MESSAGE + str(e)
+                return PLEASE_TRY_AGAIN_ERROR_MESSAGE + str(e)
         
     async def send_message_in_chunks(self,ctx,response):
         message = ""

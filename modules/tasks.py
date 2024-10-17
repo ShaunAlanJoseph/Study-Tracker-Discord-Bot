@@ -26,8 +26,9 @@ def epoch_to_date(epoch):
 
 class Task:
     
-    def __init__(self,name="",description=None,status="pending",due_date=None,completion_time=None):
+    def __init__(self,name="",task_id=None,description=None,status="pending",due_date=None,completion_time=None):
         self.user_id= ctx_mgr().get_context_user_id()
+        self.task_id = task_id
         self.name = name
         self.description = description
         self.status = status
