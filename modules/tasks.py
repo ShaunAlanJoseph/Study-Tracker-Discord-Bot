@@ -12,6 +12,22 @@ def epoch_to_date(epoch):
         return
     return str(time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(epoch / 1000)))
 
+def date_to_epoch(date: str):
+    if date is None:
+        return
+    from dateutil.parser import parse
+
+    return int(parse(date).timestamp() * 1000)
+
+def date_to_epoch(date: str):
+    if date is None:
+        return
+    from dateutil.parser import parse
+
+    return int(parse(date).timestamp() * 1000)
+    
+
+
 
 '''CREATE TABLE Tasks("
         "task_id BIGINT PRIMARY KEY,"
@@ -79,7 +95,7 @@ async def list_tasks():
             f"task number: {task[0]}\n"
             f"Description: {task[3]}\n"
             f"Status: {task[4]}\n"
-            f"Due Date: {task[5]}\n"
+            f"Due Date: {epoch_to_date(task[5])}\n"
             f"Completion Time: {epoch_to_date(task[6])}"
             )
         )
@@ -101,7 +117,8 @@ async def mark_as_done(task_id):
 async def mark_as_started(task_id):
     Task(task_id=task_id).mark_as_started()
 
-async def set_due_date(task_id, due_date):
+async def set_due_date(task_id:int, due_date:str):
+    due_date = date_to_epoch(due_date)
     query = ("UPDATE Tasks SET due_date=%s WHERE task_id=%s")
     Database.execute_query(query, due_date, task_id)
     

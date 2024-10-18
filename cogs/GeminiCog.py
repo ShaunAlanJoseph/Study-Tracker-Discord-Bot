@@ -3,6 +3,52 @@ from discord.ext import commands
 import google.generativeai as genai
 import time
 
+helpContext='''Study Tracker Commands
+List of available commands and their usage
+$ping
+Responds with 'Pong!' and alternates messages.
+$add_flashcard
+Adds a new flashcard.
+$list_flashcards
+Lists all flashcards.
+$flashcard_flash
+Flashes a specific flashcard by ID.
+$add_task
+Adds a new task with a specified name.
+$set_task
+Sets the current task by name.
+$set_task_by_id
+Sets the current task by ID.
+$add_description
+Adds a description to the current task.
+$list_tasks
+Lists all tasks.
+$remove_task
+Removes a task by name.
+$delete_task
+Deletes a task by ID.
+$mark_as_done
+Marks a task as done by name.
+$mark_as_started
+Marks a task as started by name.
+$mark_as_started_by_id
+Marks a task as started by ID.
+$mark_as_done_by_id
+Marks a task as done by ID.
+$set_due_date
+Sets a due date for the current task.Format should be YYYY-MM-DD HH:MM:SS.
+$query
+Queries the Gemini API with your question and returns a response.
+$pm
+Sends a private message to you asking how the bot can help and you can talk to it.
+$gemini enable
+Enables Gemini to respond to every message in the server.
+$gemini disable
+Disables Gemini from responding to every message in the server.
+
+'''
+
+
 genai.configure(api_key=Gemini_API_Key)
 DISCORD_MAX_MESSAGE_LENGTH=2000
 PLEASE_TRY_AGAIN_ERROR_MESSAGE='There was an issue with your question please try again.. '
@@ -19,6 +65,11 @@ class GeminiAgent(commands.Cog):
         try:
             if msg.content == "ping gemini-agent":
                 await msg.channel.send("Agent is connected..")
+            elif msg.content[:5] == "!help":
+                 prompt=msg.content[5:]
+                 global helpContext
+                 response = self.gemini_generate_content(helpContext+prompt)
+                 await self.send_message_in_chunks(msg.channel,response)
             elif 'Direct Message' in str(msg.channel) and not msg.author.bot:
                 response = self.gemini_generate_content(msg.content)
                 dmchannel = await msg.author.create_dm()
@@ -29,18 +80,21 @@ class GeminiAgent(commands.Cog):
                     await msg.channel.send('Hi, I am Gemini Agent. How can I help you today?')
                     first_time=False
                 else:
-                    response = self.gemini_generate_content(msg.content)
-                    await self.send_message_in_chunks(msg.channel,response) 
+                    if(msg.content[0]!='$'):
+                        response = self.gemini_generate_content(msg.content)
+                        await self.send_message_in_chunks(msg.channel,response) 
         except Exception as e:
-            await msg.channel.send(PLEASE_TRY_AGAIN_ERROR_MESSAGE + str(e))
+            await msg.channel.send("There was an error from serverside.. Please try again..")
+        
 
     @commands.command()
     async def query(self,ctx,*,question):
         try:
             response = self.gemini_generate_content(question)
             await self.send_message_in_chunks(ctx,response)
+            
         except Exception as e:
-            await ctx.send(PLEASE_TRY_AGAIN_ERROR_MESSAGE + str(e))
+            await ctx.send("There was an error from serverside.. Please try again..")
     
     @commands.group()
     async def gemini(self,ctx):

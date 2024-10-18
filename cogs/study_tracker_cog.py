@@ -179,7 +179,7 @@ class StudyTrackerCog(Cog):
             "query": "Queries the Gemini API with your question and returns a response.",
             "pm": "Sends a private message to you asking how the bot can help and you can talk to it.",
             "gemini enable": "Enables Gemini to respond to every message in the server.",
-            "gemini disable": "Disables Gemini from responding to every message in the server."
+            "gemini disable": "Disables Gemini from responding to every message in the server.",
         }
 
         for command_name, description in commands_info.items():
