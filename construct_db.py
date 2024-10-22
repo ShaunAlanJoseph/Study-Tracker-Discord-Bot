@@ -36,7 +36,7 @@ def main():
     Database.execute_query(query)
     
     query = ("CREATE TABLE Time_Table("
-         "tt_id INT PRIMARY KEY,"
+         "tt_id VARCHAR(12) PRIMARY KEY,"
          "user_id BIGINT NOT NULL,"
          "name VARCHAR(128) NOT NULL,"
          "description TEXT,"
@@ -51,7 +51,7 @@ def main():
     Database.execute_query(query)
     
     query = ("CREATE TABLE Time_Table_Status("
-         "tt_id INT NOT NULL,"
+         "tt_id VARCHAR(12) NOT NULL,"
          "time BIGINT NOT NULL,"
          "status VARCHAR(32),"
          "PRIMARY KEY (tt_id, time),"

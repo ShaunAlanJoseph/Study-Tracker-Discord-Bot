@@ -16,3 +16,18 @@ def get_time_from_str(time_str: str) -> int:
 def get_time_str(time: int) -> str:
     dt = datetime.fromtimestamp(time / 1000)
     return dt.strftime("%d-%m-%Y")
+
+
+def get_day(time: int) -> str:
+    dt = datetime.fromtimestamp(time / 1000)
+    return dt.strftime("%a")
+
+
+def get_minute(time: int) -> str:
+    dt = datetime.fromtimestamp(time / 1000)
+    return dt.strftime("%M")
+
+
+def get_time_frmt(frmt: str):
+    dt = datetime.now()
+    return dt.strftime(frmt)

@@ -1,4 +1,4 @@
-from discord.ext import commands
+from discord.ext import commands, tasks
 from discord.ext.commands import command, Bot, Cog, Context  # type: ignore
 from discord import Embed
 from typing import Any
@@ -11,6 +11,7 @@ class StudyTrackerCog(Cog):
     
     def __init__(self, bot: Bot):
         self.bot = bot
+        self.task_reminder.start()
         info("StudyTrackerCog has been loaded.")
 
     async def cog_command_error(self, ctx: Context[Any], error: Exception) -> None:
@@ -272,10 +273,29 @@ class StudyTrackerCog(Cog):
 
         ctx_mgr().set_init_context(ctx)
         await play_playlist(playlist_id)
+    
+    @command(name="create_time_table_entry")
+    async def create_time_table_entry(self, ctx: Context[Bot]):
+        from modules.time_table import create_time_table_entry
 
+        ctx_mgr().set_init_context(ctx)
+        await create_time_table_entry()
+    
+    @command(name="delete_time_table_entry")
+    async def delete_time_table_entry(self, ctx: Context[Bot], entry_id: str):
+        from modules.time_table import delete_time_table_entry
 
-    @command(name="help")
-    async def help_command(self, ctx: Context[Bot]):
+        ctx_mgr().set_init_context(ctx)
+        await delete_time_table_entry(entry_id)
+    
+    @tasks.loop(seconds=60)
+    async def task_reminder(self):
+        from modules.time_table import send_alert
+
+        await send_alert(self.bot)
+
+    @command(name="help1")
+    async def help1_command(self, ctx: Context[Bot]):
         embed = Embed(title="Study Tracker Commands", description="List of available commands and their usage", color=0x00ff00)
 
         commands_info = {
@@ -284,6 +304,10 @@ class StudyTrackerCog(Cog):
             "add_flashcard": "Adds a new flashcard.",
             "list_flashcards": "Lists all flashcards.",
             "flashcard_flash": "Flashes a specific flashcard by ID.",
+            "flashcard_create_set": "Creates a new flashcard set given the name.",
+            "flashcard_add_to_set": "Adds a flashcard to a set give the set_id & card_id.",
+            "flashcard_remove_from_set": "Removes a flashcard from a set given the set_id & card_id.",
+            "flashcard_review_set": "Reviews a flashcard set given the set_id.",
             "add_task": "Adds a new task with a specified name.",
             "set_task": "Sets the current task by name.",
             "set_task_by_id": "Sets the current task by ID.",
@@ -296,6 +320,27 @@ class StudyTrackerCog(Cog):
             "mark_as_started_by_id": "Marks a task as started by ID.",
             "mark_as_done_by_id": "Marks a task as done by ID.",
             "set_due_date": "Sets a due date for the current task.",
+        }
+
+        for command_name, description in commands_info.items():
+            embed.add_field(name=f"${command_name}", value=description, inline=False)
+
+        await ctx.send(embed=embed)
+    
+    @command(name="help2")
+    async def help2_command(self, ctx: Context[Bot]):
+        embed = Embed(title="Study Tracker Commands", description="List of available commands and their usage", color=0x00ff00)
+
+        commands_info = {
+            "add_song": "Adds a song to the database given name in the format: 'Song Name by Artist Name'",
+            "get_song": "Gets a song by ID.",
+            "create_playlist": "Creates a playlist given a name.",
+            "get_playlist": "Gets a playlist by ID.",
+            "add_song_to_playlist": "Adds a song to a playlist given the playlist_id & song_id.",
+            "remove_song_from_playlist": "Removes a song from a playlist given the playlist_id & song_id.",
+            "play_playlist": "Plays a playlist given the playlist_id.",
+            "create_time_table_entry": "Creates a new time table entry.",
+            "delete_time_table_entry": "Deletes a time table entry given the entry_id.",
             "query": "Queries the Gemini API with your question and returns a response.",
             "pm": "Sends a private message to you asking how the bot can help and you can talk to it.",
             "gemini enable": "Enables Gemini to respond to every message in the server.",

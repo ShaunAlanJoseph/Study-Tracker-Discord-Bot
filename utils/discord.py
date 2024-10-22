@@ -18,8 +18,9 @@ if TYPE_CHECKING:
     from discord.ext.commands import Context, Bot  # type: ignore
 
 
-async def get_channel(channel_id: int):
-    bot = ctx_mgr().get_context_bot()
+async def get_channel(channel_id: int, bot: Optional["Bot"] = None):
+    if bot is None:
+        bot = ctx_mgr().get_context_bot()
     try:
         channel_api = await bot.fetch_channel(channel_id)
         return channel_api
@@ -27,8 +28,9 @@ async def get_channel(channel_id: int):
         raise ValueError(f"Invalid channel_id: `{channel_id}` doesn't exist.")
 
 
-async def get_user(user_id: int):
-    bot = ctx_mgr().get_context_bot()
+async def get_user(user_id: int, bot: Optional["Bot"] = None):
+    if bot is None:
+        bot = ctx_mgr().get_context_bot()
     try:
         user_api = await bot.fetch_user(user_id)
         return user_api
