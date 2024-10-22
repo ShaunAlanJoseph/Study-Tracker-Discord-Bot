@@ -15,7 +15,7 @@ async def main():
 
     Database.establish_connection()
 
-    bot = commands.Bot(command_prefix="$", intents=Intents.all())
+    bot = commands.Bot(command_prefix="$", intents=Intents.all(),help_command=None)
     await bot.add_cog(StudyTrackerCog(bot))
     await bot.add_cog(GeminiAgent(bot))
 
