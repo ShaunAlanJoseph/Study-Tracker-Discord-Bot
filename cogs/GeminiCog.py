@@ -45,6 +45,7 @@ $gemini enable
 Enables Gemini to respond to every message in the server.
 $gemini disable
 Disables Gemini from responding to every message in the server.
+!help <question> to ask a question related to the commands to the bot.(rn gemini is responding to the help command)
 
 '''
 
