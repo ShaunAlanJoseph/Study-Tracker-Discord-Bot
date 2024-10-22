@@ -113,7 +113,10 @@ class StudyTrackerCog(Cog):
         await flashcard_review_set(set_id)
     
     @command(name="add_task")
-    async def add_task(self, ctx: Context[Bot],*,name: str):
+    async def add_task(self, ctx: Context[Bot],*,name=""):
+        if name.strip() == "":
+            await ctx.send("Please provide a task name")
+            return
         from modules.tasks import add_task
         ctx_mgr().set_init_context(ctx)
         await add_task(name=name)
@@ -156,10 +159,14 @@ class StudyTrackerCog(Cog):
     @command(name="remove_task")
     async def remove_task(self, ctx: Context[Bot],*,name: str):
         from modules.tasks import remove_task
-        query=("SELECT task_id FROM Tasks WHERE name=%s")
-        id=Database.fetch_one(query,name)
-        ctx_mgr().set_init_context(ctx)
-        await remove_task(id)
+        try:
+            query=("SELECT task_id FROM Tasks WHERE name=%s")
+            id=Database.fetch_one(query,name)
+            ctx_mgr().set_init_context(ctx)
+            await remove_task(id)
+        except Exception as e:
+            await ctx.send("Task not found")
+            
 
     @command(name="delete_task")
     async def delete_task(self, ctx: Context[Bot],*,id):
@@ -171,18 +178,27 @@ class StudyTrackerCog(Cog):
     @command(name="mark_as_done")
     async def mark_as_done(self, ctx: Context[Bot],*,name: str):
         from modules.tasks import mark_as_done
-        query=("SELECT task_id FROM Tasks WHERE name=%s")
-        id=Database.fetch_one(query,name)
-        ctx_mgr().set_init_context(ctx)
-        await mark_as_done(id)
+        try:
+            query=("SELECT task_id FROM Tasks WHERE name=%s")
+            id=Database.fetch_one(query,name)
+            ctx_mgr().set_init_context(ctx)
+            await mark_as_done(id)
+        except Exception as e:
+            await ctx.send("Task not found")
+
 
     @command(name="mark_as_started")
     async def mark_as_started(self, ctx: Context[Bot],*,name: str):
         from modules.tasks import mark_as_started
-        query=("SELECT task_id FROM Tasks WHERE name=%s")
-        id=Database.fetch_one(query,name)
-        ctx_mgr().set_init_context(ctx)
-        await mark_as_started(id)
+        try:
+            query=("SELECT task_id FROM Tasks WHERE name=%s")
+            id=Database.fetch_one(query,name)
+            ctx_mgr().set_init_context(ctx)
+            await mark_as_started(id)    
+        except Exception as e:
+            await ctx.send("Task not found")
+            return
+
 
     @command(name="mark_as_started_by_id")
     async def mark_as_started_by_id(self, ctx: Context[Bot],*,id: str):

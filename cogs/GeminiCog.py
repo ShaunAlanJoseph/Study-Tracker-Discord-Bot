@@ -3,50 +3,85 @@ from discord.ext import commands
 import google.generativeai as genai
 import time
 
-helpContext='''Study Tracker Commands
-List of available commands and their usage
-$ping
-Responds with 'Pong!' and alternates messages.
-$add_flashcard
-Adds a new flashcard.
-$list_flashcards
-Lists all flashcards.
-$flashcard_flash
-Flashes a specific flashcard by ID.
-$add_task
-Adds a new task with a specified name.
-$set_task
-Sets the current task by name.
-$set_task_by_id
-Sets the current task by ID.
-$add_description
-Adds a description to the current task.
-$list_tasks
-Lists all tasks.
-$remove_task
-Removes a task by name.
-$delete_task
-Deletes a task by ID.
-$mark_as_done
-Marks a task as done by name.
-$mark_as_started
-Marks a task as started by name.
-$mark_as_started_by_id
-Marks a task as started by ID.
-$mark_as_done_by_id
-Marks a task as done by ID.
-$set_due_date
-Sets a due date for the current task.Format should be YYYY-MM-DD HH:MM:SS.
-$query
-Queries the Gemini API with your question and returns a response.
-$pm
-Sends a private message to you asking how the bot can help and you can talk to it.
-$gemini enable
-Enables Gemini to respond to every message in the server.
-$gemini disable
-Disables Gemini from responding to every message in the server.
-!help <question> to ask a question related to the commands to the bot.(rn gemini is responding to the help command)
+helpContext='''
+Below is the list of available commands
 
+Study Tracker Commands
+
+Flashcard Commands
+- $add_flashcard 
+    {message}
+  Adds a new flashcard. Message format should be
+# Q: <question 256 chars>
+## A: <answer 256 chars>
+- <option1 256 chars>
+- <option2 256 chars>
+- <option3>
+
+- $list_flashcards  
+  Lists all flashcards. No arguments required.
+- $flashcard_flash {card_id}  
+  Flashes a specific flashcard by ID. Takes one argument: card_id.
+
+Task Management Commands
+- $add_task {name}  
+  Adds a new task with a specified name. Takes one argument: name.
+- $set_task {name}  
+  Sets the current task by name. Takes one argument: name.
+- $set_task_by_id {id}  
+  Sets the current task by ID. Takes one argument: id.
+- $add_description {description}  
+  Adds a description to the current task. Takes one argument: description.
+- $list_tasks  
+  Lists all tasks. No arguments required.
+- $remove_task {name}  
+  Removes a task by name. Takes one argument: name.
+- $delete_task {id}  
+  Deletes a task by ID. Takes one argument: id.Also called task number
+- $mark_as_done {name}  
+  Marks a task as done by name. Takes one argument: name.
+- $mark_as_started {name}  
+  Marks a task as started by name. Takes one argument: name.
+- $mark_as_started_by_id {id}  
+  Marks a task as started by ID. Takes one argument: id.
+- $mark_as_done_by_id {id}  
+  Marks a task as done by ID. Takes one argument: id.
+- $set_due_date {due_date}  
+  Sets a due date for the current task. Takes one argument: due_date (format: YYYY-MM-DD HH:MM:SS).
+
+Music Commands
+- $add_song {message}  
+  Adds a new song. Message format should be 'Song Name by Artist.
+  For example: despacito by justin bieber
+  An attachment containing an audio file(mp3) should be sent with the message
+- $get_song {song_id}  
+  Retrieves a song by ID. Takes one argument: song_id.
+- $create_playlist {args}  
+  Creates a new playlist. Takes multiple arguments: args (details of the playlist).
+- $get_playlist {playlist_id}  
+  Retrieves a playlist by ID. Takes one argument: playlist_id.
+- $add_song_to_playlist {playlist_id} {song_id}  
+  Adds a song to a playlist by song ID and playlist ID. Takes two arguments: playlist_id, song_id.
+- $remove_song_from_playlist {playlist_id} {song_id}  
+  Removes a song from a playlist by song ID and playlist ID. Takes two arguments: playlist_id, song_id.
+- $play_playlist {playlist_id}  
+  Plays a playlist by ID. Takes one argument: playlist_id.
+
+General Purpose Commands
+- $ping  
+  Responds with 'Pong!' and alternates messages. No arguments required.
+- $query {question}  
+  Queries the Gemini API with your question and returns a response. Takes one argument: question.
+- $pm  
+  Sends a private message to you asking how the bot can help and you can talk to it. No arguments required.
+- $gemini enable  
+  Enables Gemini to respond to every message in the server. No arguments required.
+- $gemini disable  
+  Disables Gemini from responding to every message in the server. No arguments required.
+- $register {name}  
+  Registers a new user. Takes the name of the user
+- !help {question}  
+  To ask a question related to the commands to the bot. Takes one optional argument: question.
 '''
 
 
