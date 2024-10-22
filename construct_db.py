@@ -72,8 +72,9 @@ def main():
     
     
     query = ("CREATE TABLE Songs("
-      "song_id INT PRIMARY KEY,"
+      "song_id VARCHAR(12) PRIMARY KEY,"
       "user_id BIGINT NOT NULL,"
+      "name VARCHAR(128) NOT NULL,"
       "bytes bytea NOT NULL,"
       "artist VARCHAR(64) NOT NULL,"
       "FOREIGN KEY (user_id) REFERENCES Users(user_id)"
@@ -82,17 +83,17 @@ def main():
     Database.execute_query(query)
     
     query = ("CREATE TABLE Playlist("
-         "playlist_id INT PRIMARY KEY,"
+         "playlist_id VARCHAR(12) PRIMARY KEY,"
          "user_id BIGINT NOT NULL,"
-         "description TEXT,"
+         "name VARCHAR(128) NOT NULL,"
          "FOREIGN KEY (user_id) REFERENCES Users(user_id)"
          ")")
     
     Database.execute_query(query)
     
     query = ("CREATE TABLE Playlist_Songs("
-         "playlist_id INT,"
-         "song_id INT,"
+         "playlist_id VARCHAR(12),"
+         "song_id VARCHAR(12),"
          "PRIMARY KEY (playlist_id, song_id),"
          "FOREIGN KEY (playlist_id) REFERENCES Playlist(playlist_id),"
          "FOREIGN KEY (song_id) REFERENCES Songs(song_id)"

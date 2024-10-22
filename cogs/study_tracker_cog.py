@@ -207,6 +207,55 @@ class StudyTrackerCog(Cog):
             await ctx.send("Use set_task <task_name> or set_task_by_id <task_id>")
         ctx_mgr().set_init_context(ctx)
         await set_due_date(id, due_date)
+    
+    @command(name="add_song")
+    async def add_song(self, ctx: Context[Bot], *args: str):
+        from modules.songs import add_song
+
+        ctx_mgr().set_init_context(ctx)
+        await add_song(*args)
+    
+    @command(name="get_song")
+    async def get_song(self, ctx: Context[Bot], song_id: str):
+        from modules.songs import get_song
+
+        ctx_mgr().set_init_context(ctx)
+        await get_song(song_id)
+    
+    @command(name="create_playlist")
+    async def create_playlist(self, ctx: Context[Bot], *args: str):
+        from modules.songs import create_playlist
+
+        ctx_mgr().set_init_context(ctx)
+        await create_playlist(*args)
+    
+    @command(name="get_playlist")
+    async def get_playlist(self, ctx: Context[Bot], playlist_id: str):
+        from modules.songs import get_playlist
+
+        ctx_mgr().set_init_context(ctx)
+        await get_playlist(playlist_id)
+
+    @command(name="add_song_to_playlist")
+    async def add_song_to_playlist(self, ctx: Context[Bot], playlist_id: str, song_id: str):
+        from modules.songs import add_song_to_playlist
+
+        ctx_mgr().set_init_context(ctx)
+        await add_song_to_playlist(playlist_id, song_id)
+    
+    @command(name="remove_song_from_playlist")
+    async def remove_song_from_playlist(self, ctx: Context[Bot], playlist_id: str, song_id: str):
+        from modules.songs import remove_song_from_playlist
+
+        ctx_mgr().set_init_context(ctx)
+        await remove_song_from_playlist(playlist_id, song_id)
+
+    @command(name="play_playlist")
+    async def play_playlist(self, ctx: Context[Bot], playlist_id: str):
+        from modules.songs import play_playlist
+
+        ctx_mgr().set_init_context(ctx)
+        await play_playlist(playlist_id)
 
 
     @command(name="help")

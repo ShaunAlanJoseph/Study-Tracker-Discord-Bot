@@ -48,7 +48,7 @@ class Database:
                 cur.execute(query, args)
             Database.commit()
         except Exception as exc:
-            error(f"exc: {exc}\nquery: {query}", exc_info=True)
+            error(f"exc: {exc}\nquery: {query}\nargs: {args}", exc_info=True)
 
     @staticmethod
     def fetch_many(query: str, *args: Any) -> List[Tuple[Any, ...]]:
