@@ -114,7 +114,8 @@ def main():
     
         
     query = ("CREATE TABLE Flashcard_Set("
-         "card_set_id INT PRIMARY KEY,"
+         "card_set_id VARCHAR(12) PRIMARY KEY,"
+         "name VARCHAR(128) NOT NULL,"
          "owner BIGINT NOT NULL,"
          "description TEXT,"
          "FOREIGN KEY (owner) REFERENCES Users(user_id)"
@@ -123,7 +124,7 @@ def main():
     Database.execute_query(query)
     
     query = ("CREATE TABLE Flashcard_set_access("
-           "card_set_id INT,"
+           "card_set_id VARCHAR(12),"
            "user_id BIGINT,"
            "PRIMARY KEY (card_set_id, user_id),"
            "FOREIGN KEY (card_set_id) REFERENCES Flashcard_Set(card_set_id),"
@@ -133,7 +134,7 @@ def main():
     Database.execute_query(query)
     
     query = ("CREATE TABLE Flashcard_Set_Cards("
-         "card_set_id INT,"
+         "card_set_id VARCHAR(12),"
          "card_id VARCHAR(12),"
          "added_by BIGINT NOT NULL,"
          "PRIMARY KEY (card_set_id, card_id),"
@@ -147,7 +148,7 @@ def main():
          "card_id VARCHAR(12),"
          "user_id BIGINT,"
          "time BIGINT,"
-         "status VARCHAR(32),"
+         "correct BOOLEAN,"
          "PRIMARY KEY (card_id, user_id, time),"
          "FOREIGN KEY (card_id) REFERENCES Flashcard(card_id),"
          "FOREIGN KEY (user_id) REFERENCES Users(user_id)"

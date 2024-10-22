@@ -34,8 +34,35 @@ class StudyTrackerCog(Cog):
         await sleep(3)
         embed3 = BaseEmbed(title="Ping!")
         await send_message(content="Pong!", embed=embed3)
-
     
+    @command(name="register")
+    async def register(self, ctx: Context[Bot], *args: str):
+        from modules.user import register_user
+
+        ctx_mgr().set_init_context(ctx)
+        await register_user(*args)
+    
+    @command(name="set_institution")
+    async def set_institution(self, ctx: Context[Bot], *args: str):
+        from modules.user import set_institution
+
+        ctx_mgr().set_init_context(ctx)
+        await set_institution(*args)
+    
+    @command(name="set_time_zone")
+    async def set_time_zone(self, ctx: Context[Bot], time_zone: str):
+        from modules.user import set_time_zone
+
+        ctx_mgr().set_init_context(ctx)
+        await set_time_zone(time_zone)
+    
+    @command(name="set_dob")
+    async def set_dob(self, ctx: Context[Bot], *args: str):
+        from modules.user import set_dob
+
+        ctx_mgr().set_init_context(ctx)
+        await set_dob(*args)
+
     @command(name="add_flashcard")
     async def add_flashcard(self, ctx: Context[Bot]):
         from modules.flashcards import add_flashcard
@@ -56,6 +83,34 @@ class StudyTrackerCog(Cog):
         
         ctx_mgr().set_init_context(ctx)
         await flashcard_flash(card_id)
+    
+    @command(name="flashcard_create_set")
+    async def flashcard_create(self, ctx: Context[Bot], set_name: str):
+        from modules.flashcards import flashcard_create_set
+
+        ctx_mgr().set_init_context(ctx)
+        await flashcard_create_set(set_name)
+    
+    @command(name="flashcard_add_to_set")
+    async def flashcard_add_to_set(self, ctx: Context[Bot], set_id: str, card_id: str):
+        from modules.flashcards import flashcard_add_to_set
+
+        ctx_mgr().set_init_context(ctx)
+        await flashcard_add_to_set(set_id, card_id)
+
+    @command(name="flashcard_remove_from_set")
+    async def flashcard_remove_from_set(self, ctx: Context[Bot], set_id: str, card_id: str):
+        from modules.flashcards import flashcard_remove_from_set
+
+        ctx_mgr().set_init_context(ctx)
+        await flashcard_remove_from_set(set_id, card_id)
+    
+    @command(name="flashcard_review_set")
+    async def flashcard_review_set(self, ctx: Context[Bot], set_id: str):
+        from modules.flashcards import flashcard_review_set
+
+        ctx_mgr().set_init_context(ctx)
+        await flashcard_review_set(set_id)
     
     @command(name="add_task")
     async def add_task(self, ctx: Context[Bot],*,name: str):

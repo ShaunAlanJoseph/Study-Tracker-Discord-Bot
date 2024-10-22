@@ -4,6 +4,7 @@ from discord import Interaction
 from utils.context_manager import ctx_mgr
 from utils.discord import send_message, get_files_from_message, BaseEmbed, BaseView
 from utils.random import generate_random_string
+from utils.general import get_time
 from database import Database
 
 
@@ -86,6 +87,100 @@ class Flashcard:
     
     def get_details_embed(self) -> BaseEmbed:
         return FlashcardDetailsEmbed(self, show_answer=True, show_options=True)
+    
+    def add_history(self, correct: bool):
+        user_id = ctx_mgr().get_context_user_id()
+        time = get_time()
+        query = "INSERT INTO flashcard_history (card_id, user_id, time, correct) VALUES (%s, %s, %s, %s)"
+        Database.execute_query(query, self.id, user_id, time, correct)
+
+
+class FlashcardSet:
+    @classmethod
+    def get_user_sets(cls, user_id: int) -> List[Self]:
+        query = "SELECT card_set_id, name, owner, description FROM flashcard_set WHERE owner = %s"
+        result = Database.fetch_many(query, user_id)
+        sets: List[Self] = []
+        for row in result:
+            card_set = cls()
+            card_set.id = row[0]
+            card_set.name = row[1]
+            card_set.owner = row[2]
+            card_set.description = row[3]
+            sets.append(card_set)
+        return sets
+    
+    def __init__(self):
+        self.id: Optional[str] = None
+        self.owner: Optional[int] = None
+        self.name: Optional[str] = None
+        self.description: Optional[str] = None
+        self.flashcard_ids: List[str] = []
+        self.flashcards: List[Flashcard] = []
+    
+    def load_flashcard_set(self):
+        assert self.id is not None
+
+        query = "SELECT name, owner, description FROM flashcard_set WHERE card_set_id = %s"
+        result = Database.fetch_one(query, self.id)
+        self.name = result[0]
+        self.owner = result[1]
+        self.description = result[2]
+    
+    def load_flashcard_ids(self):
+        assert self.id is not None
+
+        query = "SELECT card_id FROM flashcard_set_cards WHERE card_set_id = %s"
+        result = Database.fetch_many(query, self.id)
+        self.flashcard_ids = [row[0] for row in result]
+    
+    def load_flashcards(self):
+        for card_id in self.flashcard_ids:
+            flashcard = Flashcard()
+            flashcard.id = card_id
+            flashcard.load_flashcard()
+            self.flashcards.append(flashcard)
+    
+    def generate_id(self):
+        while True:
+            self.id = generate_random_string(12)
+            try:
+                query = "SELECT card_set_id FROM flashcard_set WHERE card_set_id = %s"
+                Database.fetch_one(query, self.id)
+            except:
+                break
+    
+    def save_flashcard_set(self):
+        assert self.id is not None
+        assert self.name is not None
+        assert self.owner is not None
+
+        query = "INSERT INTO flashcard_set (card_set_id, name, owner, description) VALUES (%s, %s, %s, %s)"
+        Database.execute_query(query, self.id, self.name, self.owner, self.description)
+    
+    def add_flashcard_to_set(self, card_id: str):
+        self.load_flashcard_ids()
+
+        if card_id in self.flashcard_ids:
+            return
+        
+        self.flashcard_ids.append(card_id)
+        
+        user_id = ctx_mgr().get_context_user_id()
+        query = "INSERT INTO flashcard_set_cards (card_set_id, card_id, added_by) VALUES (%s, %s, %s)"
+        Database.execute_query(query, self.id, card_id, user_id)
+
+    
+    def remove_flashcard_from_set(self, card_id: str):
+        self.load_flashcard_ids()
+
+        if card_id not in self.flashcard_ids:
+            return
+        
+        self.flashcard_ids.remove(card_id)
+
+        query = "DELETE FROM flashcard_set_cards WHERE card_set_id = %s AND card_id = %s"
+        Database.execute_query(query, self.id, card_id)
 
 
 class FlashcardDetailsEmbed(BaseEmbed):
@@ -135,20 +230,26 @@ class FlashcardAnswerEmbed(BaseEmbed):
 
 
 class FlashcardFlashView(BaseView):
-    def __init__(self, flashcard: Flashcard):
-        self.flashcard = flashcard
-
+    def __init__(self, flashcards: List[Flashcard]):
+        self.flashcards = flashcards
+        self.idx = 0
         self.show_answer: bool = False
         self.correct: bool = False
         super().__init__()
     
     def _add_items(self):
         if self.show_answer:
-            self._add_button(label="Repeat", custom_id="repeat")
+            disabled = self.idx == 0
+            self._add_button(label="Previous", custom_id="previous", disabled=disabled)
             
+            self._add_button(label="Repeat", custom_id="repeat")
+
+            disabled = self.idx == len(self.flashcards) - 1
+            self._add_button(label="Next", custom_id="next", disabled=disabled)
+
         else:
             options: Dict[str, str] = {}
-            for i, option in enumerate(self.flashcard.options):
+            for i, option in enumerate(self.flashcards[self.idx].options):
                 options[f"{i}"] = option
 
             self._add_dropdown(custom_id="options", options=options, placeholder="Select an option")
@@ -157,7 +258,13 @@ class FlashcardFlashView(BaseView):
     async def _button_clicked(self, interaction: Interaction, custom_id: str) -> None:
         await interaction.response.defer()
 
-        if custom_id == "repeat":
+        if custom_id == "previous":
+            self.idx -= 1
+            self.show_answer = False
+        elif custom_id == "repeat":
+            self.show_answer = False
+        elif custom_id == "next":
+            self.idx += 1
             self.show_answer = False
         else:
             raise ValueError(f"Invalid custom_id: {custom_id}")
@@ -169,7 +276,8 @@ class FlashcardFlashView(BaseView):
         await interaction.response.defer()
         
         if custom_id == "options":
-            self.correct = self.flashcard.options[int(values[0])] == self.flashcard.answer
+            self.correct = self.flashcards[self.idx].options[int(values[0])] == self.flashcards[self.idx].answer
+            self.flashcards[self.idx].add_history(correct=self.correct)
             self.show_answer = True
         else:
             raise ValueError(f"Invalid custom_id: {custom_id}")
@@ -179,9 +287,9 @@ class FlashcardFlashView(BaseView):
     @override
     async def get_embed_files(self):
         if self.show_answer:
-            embed = FlashcardAnswerEmbed(self.flashcard, correct=self.correct)
+            embed = FlashcardAnswerEmbed(self.flashcards[self.idx], correct=self.correct)
         else:
-            embed = FlashcardQuestionEmbed(self.flashcard)
+            embed = FlashcardQuestionEmbed(self.flashcards[self.idx])
         return embed, None
 
 
@@ -228,6 +336,18 @@ class FlashcardListView(BaseView):
         return embed, None
 
 
+class FlashcardSetDetailsEmbed(BaseEmbed):
+    def __init__(self, card_set: FlashcardSet):
+        super().__init__(title="Flashcard Set Details")
+        self.add_field(name="ID", value=f"`{card_set.id}`")
+        self.add_field(name="Name", value=f"{card_set.name}")
+        self.add_field(name="Owner", value=f"<@{card_set.owner}>")
+        self.add_field(name="Description", value=f"{card_set.description}")
+
+        for i, id in enumerate(card_set.flashcard_ids):
+            self.add_field(name=f"Flashcard {i+1}", value=f"`{id}`")
+
+
 async def add_flashcard():
     message = ctx_mgr().get_init_context().message
 
@@ -260,7 +380,7 @@ async def add_flashcard():
 
     if not flashcard.check_valid():
         flashcard_format = (
-            "# Q: <question 256 chars>"
+            "# Q: <question 256 chars>\n"
             "## A: <answer 256 chars>\n"
             "- <option1 256 chars>\n"
             "- <option2 256 chars>\n"
@@ -294,6 +414,88 @@ async def flashcard_flash(card_id: str):
     except ValueError as e:
         await send_message(content=str(e), mention_author=True)
         return
-    view = FlashcardFlashView(flashcard)
+    view = FlashcardFlashView([flashcard])
     await view.send()
 
+
+async def flashcard_create_set(set_name: str):
+    content = ctx_mgr().get_init_context().message.content
+    user_id = ctx_mgr().get_context_user_id()
+
+    card_set = FlashcardSet()
+    card_set.generate_id()
+    card_set.owner = user_id
+    card_set.name = set_name
+    if content.find("```\n") != -1:
+        card_set.description = content[content.find("```\n") + 4:content.rfind("\n```")] 
+    card_set.save_flashcard_set()
+
+    embed = FlashcardSetDetailsEmbed(card_set)
+    await send_message(embed=embed)
+
+
+async def flashcard_add_to_set(set_id: str, card_id: str):
+    flashcard = Flashcard()
+    flashcard.id = card_id
+    try:
+        flashcard.load_flashcard()
+    except ValueError:
+        content = "ERROR: Flashcard not found."
+        await send_message(content=content, mention_author=True)
+        return
+    
+    card_set = FlashcardSet()
+    card_set.id = set_id
+    try:
+        card_set.load_flashcard_set()
+    except ValueError:
+        content = "ERROR: Flashcard set not found."
+        await send_message(content=content, mention_author=True)
+        return
+    
+    card_set.add_flashcard_to_set(card_id)
+    
+    embed = FlashcardSetDetailsEmbed(card_set)
+    await send_message(embed=embed)
+
+
+async def flashcard_remove_from_set(set_id: str, card_id: str):
+    flashcard = Flashcard()
+    flashcard.id = card_id
+    try:
+        flashcard.load_flashcard()
+    except ValueError:
+        content = "ERROR: Flashcard not found."
+        await send_message(content=content, mention_author=True)
+        return
+    
+    card_set = FlashcardSet()
+    card_set.id = set_id
+    try:
+        card_set.load_flashcard_set()
+    except ValueError:
+        content = "ERROR: Flashcard set not found."
+        await send_message(content=content, mention_author=True)
+        return
+    
+    card_set.remove_flashcard_from_set(card_id)
+
+    embed = FlashcardSetDetailsEmbed(card_set)
+    await send_message(embed=embed)
+
+
+async def flashcard_review_set(set_id: str):
+    card_set = FlashcardSet()
+    card_set.id = set_id
+    try:
+        card_set.load_flashcard_set()
+    except ValueError:
+        content = "ERROR: Flashcard set not found."
+        await send_message(content=content, mention_author=True)
+        return
+    
+    card_set.load_flashcard_ids()
+    card_set.load_flashcards()
+
+    view = FlashcardFlashView(card_set.flashcards)
+    await view.send()
