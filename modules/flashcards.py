@@ -55,8 +55,8 @@ class Flashcard:
         while True:
             self.id = generate_random_string(12)
             try:
-                query = f"SELECT card_id FROM flashcard WHERE card_id = '{self.id}'"
-                Database.fetch_one(query)
+                query = f"SELECT card_id FROM flashcard WHERE card_id = %s"
+                Database.fetch_one(query, self.id)
             except:
                 break
 
