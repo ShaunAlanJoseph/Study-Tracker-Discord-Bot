@@ -93,7 +93,7 @@ Users (user_id (PK), username, join_date) // Strong Entity
   
 ### ER Diagram:
 
-<img src = "./images/er-diagram.png" >
+<img src = "./design/er-diagram.png" >
 
 
 ### Logical Design:
@@ -208,8 +208,205 @@ However in this project these operations are performed internally by discord thr
  
 
 ### User Interface (UI) Design:
-  For this project, the UI is implemented as a Discord bot using the `discord.py` library.
-
----
+  For this project, the UI is implemented as a Discord bot using the `discord.py` python library.
 
 
+### Technologies Used 
+
+**Front End**:
+ - Using discord.py and discord
+ **Back End**:
+ - Using pyscop2.py, a PostgreSQL  framework for python
+ **API**:
+ - Gemini Flash 1.5  API along with google.genai module in python
+ **Python requirements.txt File**:
+```txt
+python-dotenv
+
+discord
+
+discord.py
+
+psycopg2
+
+google-generativeai
+
+python-dateutil
+ 
+```
+
+
+## 5. Testing and Validation
+
+### Test Cases:
+- **Task Management:**
+  - Create a task and verify it appears in the database.
+  - Update a task and check if changes are reflected.
+  - Delete a task and ensure it is removed from the database.
+  - Retrieve tasks for a user and ensure correct data is fetched.
+
+- **Focus Mode:**
+  - Start a focus mode session and check if it's recorded.
+  - End a focus mode session and verify if the status is updated.
+
+- **Playlist Management:**
+  - Create a playlist and add songs, then verify through fetching.
+  - Update playlist details and check for changes.
+  - Delete a playlist and ensure all related songs are also handled.
+
+- **Notifications and Reminders:**
+  - Set a reminder for a task and check if the notification is triggered at the right time.
+  - Start a focus mode and verify if a reminder is sent when the session is about to end.
+
+### Validation:
+- **Functional Validation:**  All functionalities such as task creation, updating, deletion, and notifications work as intended.
+- **Performance Validation:** The bot handles multiple users and concurrent operations efficiently.
+- **Security Validation:** The data is securely handled with user verification.
+
+## 6. User Manual
+
+### Set Up
+**Go to our GitHub at https://github.com/ShaunAlanJoseph/Study-Tracker-Discord-Bot and follow the set up instructions**
+
+### Prerequisites
+
+- Python 3.6 or higher
+- A Discord account
+- Access to the [Discord Developer Portal](https://discord.com/developers/applications) to create a bot
+- Gemini API access
+
+### Installation
+
+1. **Clone the repository:**
+
+   ```bash
+   git clone https://github.com/ShaunAlanJoseph/Study-Tracker-Discord-Bot.git
+   ```
+
+2. **Install Dependancies:**
+```bash
+pip install -r requirements.txt
+```
+3.  **Create a `.env` file in the root directory of the project and add the following lines:**
+```
+DISCORD_API_TOKEN=<Your_Discord_Bot_Token>
+Gemini_API_Key=<Your_Gemini_API_Key>
+
+
+ADMIN_CHANNEL_ID=<admin channel id>
+
+DB_URL=<postgres db url>
+
+DB_PORT=<postgres port>
+
+DB_NAME=<your database name>
+
+DB_USER=<your username>
+
+DB_PASS=<your password>
+
+
+
+```
+
+4. **Run the bot:**
+```bash
+python bot.py
+```
+
+### Using the bot
+- Command prefix is $
+- Write !help to ask Gemini AI for help regarding any of the commands .Alternatively you can use $help to see a list of available commands
+
+```
+Study Tracker Commands
+
+List of available commands and their usage
+
+$ping
+
+Responds with 'Pong!' and alternates messages.
+
+$add_flashcard
+
+Adds a new flashcard.
+
+$list_flashcards
+
+Lists all flashcards.
+
+$flashcard_flash
+
+Flashes a specific flashcard by ID.
+
+$add_task
+
+Adds a new task with a specified name.
+
+$set_task
+
+Sets the current task by name.
+
+$set_task_by_id
+
+Sets the current task by ID.
+
+$add_description
+
+Adds a description to the current task.
+
+$list_tasks
+
+Lists all tasks.
+
+$remove_task
+
+Removes a task by name.
+
+$delete_task
+
+Deletes a task by ID.
+
+$mark_as_done
+
+Marks a task as done by name.
+
+$mark_as_started
+
+Marks a task as started by name.
+
+$mark_as_started_by_id
+
+Marks a task as started by ID.
+
+$mark_as_done_by_id
+
+Marks a task as done by ID.
+
+$set_due_date
+
+Sets a due date for the current task.Format should be YYYY-MM-DD HH:MM:SS.
+
+$query
+
+Queries the Gemini API with your question and returns a response.
+
+$pm
+
+Sends a private message to you asking how the bot can help and you can talk to it.
+
+$gemini enable
+
+Enables Gemini to respond to every message in the server.
+
+$gemini disable
+
+Disables Gemini from responding to every message in the server.
+
+!help <question> to ask a question related to the commands to the bot. 
+
+```
+
+
+-----------------------------------------------**THE END**----------------------------------------------------
+  
