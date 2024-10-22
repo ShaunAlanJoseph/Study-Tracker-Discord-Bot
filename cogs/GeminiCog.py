@@ -56,8 +56,8 @@ Music Commands
   An attachment containing an audio file(mp3) should be sent with the message
 - $get_song {song_id}  
   Retrieves a song by ID. Takes one argument: song_id.
-- $create_playlist {args}  
-  Creates a new playlist. Takes multiple arguments: args (details of the playlist).
+- $create_playlist {playlist name}  
+  Creates a new playlist. Takes the name of the playlist.
 - $get_playlist {playlist_id}  
   Retrieves a playlist by ID. Takes one argument: playlist_id.
 - $add_song_to_playlist {playlist_id} {song_id}  
@@ -66,6 +66,18 @@ Music Commands
   Removes a song from a playlist by song ID and playlist ID. Takes two arguments: playlist_id, song_id.
 - $play_playlist {playlist_id}  
   Plays a playlist by ID. Takes one argument: playlist_id.
+
+Time Table Management Commands
+- $create_time_table_entry {message}
+  Adds a new time table entry. Message format should be
+  # name: <name>
+  ## time: <time>
+  ## days: <days>
+  ## duration: <duration>(an integer in minutes)
+  - description: <description>
+-$delete_time_table_entry {tt_id}
+  Removes a time table entry by ID. Takes one argument: tt_id.
+
 
 General Purpose Commands
 - $ping  
