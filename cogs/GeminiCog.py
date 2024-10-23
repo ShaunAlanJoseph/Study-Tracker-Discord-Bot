@@ -10,13 +10,14 @@ Study Tracker Commands
 
 Flashcard Commands
 - $add_flashcard 
-    {message}
+    {message} (message should be in a new line)
   Adds a new flashcard. Message format should be
 # Q: <question 256 chars>
 ## A: <answer 256 chars>
 - <option1 256 chars>
 - <option2 256 chars>
 - <option3>
+ Always give atleast 2 options and try to give 3 options
 
 - $list_flashcards  
   Lists all flashcards. No arguments required.
@@ -80,7 +81,7 @@ Time Table Management Commands
   Adds a new time table entry. Message format should be
   # name: <name>
   ## time: <time>
-  ## days: <days>
+  ## days: <day>(day should be first three letters of the word with first letter in capital.E.g. Mon)
   ## duration: <duration>(an integer in minutes)
   - description: <description>
 -$delete_time_table_entry {tt_id}
