@@ -22,6 +22,14 @@ Flashcard Commands
   Lists all flashcards. No arguments required.
 - $flashcard_flash {card_id}  
   Flashes a specific flashcard by ID. Takes one argument: card_id.
+- $flashcard_create_set {set_name}
+  Creates a new flashcard set. Takes one argument: <set_name>
+- $flashcard_add_to_set {set_id} {card_id}
+  Adds a flashcard to a set by ID. Takes two arguments: set_id, card_id.
+- $flashcard_remove_from_set {set_id} {card_id}
+  Removes a flashcard from a set by ID. Takes two arguments: set_id, card_id.
+- $flashcard_review_set {set_id}
+  Reviews a flashcard set by ID. Takes one argument: set_id.
 
 Task Management Commands
 - $add_task {name}  
@@ -92,6 +100,10 @@ General Purpose Commands
   Disables Gemini from responding to every message in the server. No arguments required.
 - $register {name}  
   Registers a new user. Takes the name of the user
+- $set_institution {institution}
+  Sets the institution of the user. Takes the name of the institution
+- $set_dob {dob}
+  Sets the date of birth of the user. Takes the date of birth in the format DD MM YYYY
 - !help {question}  
   To ask a question related to the commands to the bot. Takes one optional argument: question.
 '''

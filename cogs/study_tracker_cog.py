@@ -48,28 +48,49 @@ class StudyTrackerCog(Cog):
         from modules.user import set_institution
 
         ctx_mgr().set_init_context(ctx)
-        await set_institution(*args)
+        try:
+            query = ("SELECT user_id FROM Users WHERE user_id=%s")
+            Database.fetch_one(query, ctx_mgr().get_context_user_id())
+            await set_institution(*args)
+        except Exception as e:
+            await ctx.send("User not found. Please register first.")
     
     @command(name="set_time_zone")
     async def set_time_zone(self, ctx: Context[Bot], time_zone: str):
         from modules.user import set_time_zone
 
         ctx_mgr().set_init_context(ctx)
-        await set_time_zone(time_zone)
+        try:
+            query = ("SELECT user_id FROM Users WHERE user_id=%s")
+            Database.fetch_one(query, ctx_mgr().get_context_user_id())
+            await set_time_zone(time_zone)
+        except Exception as e:
+            await ctx.send("User not found. Please register first.")
     
     @command(name="set_dob")
     async def set_dob(self, ctx: Context[Bot], *args: str):
         from modules.user import set_dob
 
         ctx_mgr().set_init_context(ctx)
-        await set_dob(*args)
+        try:
+            query = ("SELECT user_id FROM Users WHERE user_id=%s")
+            Database.fetch_one(query, ctx_mgr().get_context_user_id())
+            await set_dob(*args)
+        except Exception as e:
+            await ctx.send("User not found. Please register first.")
+       
 
     @command(name="add_flashcard")
     async def add_flashcard(self, ctx: Context[Bot]):
         from modules.flashcards import add_flashcard
-
+        
         ctx_mgr().set_init_context(ctx)
-        await add_flashcard()
+        try:
+            query = ("SELECT user_id FROM Users WHERE user_id=%s")
+            Database.fetch_one(query, ctx_mgr().get_context_user_id())
+            await add_flashcard()
+        except Exception as e:
+            await ctx.send("User not found. Please register first.")
     
     @command(name="list_flashcards")
     async def list_flashcards(self, ctx: Context[Bot]):
@@ -88,9 +109,13 @@ class StudyTrackerCog(Cog):
     @command(name="flashcard_create_set")
     async def flashcard_create(self, ctx: Context[Bot], set_name: str):
         from modules.flashcards import flashcard_create_set
-
-        ctx_mgr().set_init_context(ctx)
-        await flashcard_create_set(set_name)
+        try:
+            ctx_mgr().set_init_context(ctx)
+            query = ("SELECT user_id FROM Users WHERE user_id=%s")
+            Database.fetch_one(query, ctx_mgr().get_context_user_id())
+            await flashcard_create_set(set_name)
+        except Exception as e:
+            await ctx.send("User not found. Please register first.")
     
     @command(name="flashcard_add_to_set")
     async def flashcard_add_to_set(self, ctx: Context[Bot], set_id: str, card_id: str):
@@ -230,7 +255,12 @@ class StudyTrackerCog(Cog):
         from modules.songs import add_song
 
         ctx_mgr().set_init_context(ctx)
-        await add_song(*args)
+        try:
+            query = ("SELECT user_id FROM Users WHERE user_id=%s")
+            Database.fetch_one(query, ctx_mgr().get_context_user_id())
+            await add_song(*args)
+        except Exception as e:
+            await ctx.send("User not found. Please register first.")
     
     @command(name="get_song")
     async def get_song(self, ctx: Context[Bot], song_id: str):
@@ -244,7 +274,12 @@ class StudyTrackerCog(Cog):
         from modules.songs import create_playlist
 
         ctx_mgr().set_init_context(ctx)
-        await create_playlist(*args)
+        try:
+            query = ("SELECT user_id FROM Users WHERE user_id=%s")
+            Database.fetch_one(query, ctx_mgr().get_context_user_id())
+            await create_playlist(*args)
+        except Exception as e:
+            await ctx.send("User not found. Please register first.")
     
     @command(name="get_playlist")
     async def get_playlist(self, ctx: Context[Bot], playlist_id: str):
@@ -279,7 +314,12 @@ class StudyTrackerCog(Cog):
         from modules.time_table import create_time_table_entry
 
         ctx_mgr().set_init_context(ctx)
-        await create_time_table_entry()
+        try:
+            query = ("SELECT user_id FROM Users WHERE user_id=%s")
+            Database.fetch_one(query, ctx_mgr().get_context_user_id())
+            await create_time_table_entry()
+        except Exception as e:
+            await ctx.send("User not found. Please register first.")
     
     @command(name="delete_time_table_entry")
     async def delete_time_table_entry(self, ctx: Context[Bot], entry_id: str):
