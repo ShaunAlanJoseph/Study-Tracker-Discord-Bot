@@ -12,7 +12,7 @@ The objective of the Study Tracker Discord Bot is to help users manage their stu
 
 ### System Specification:
 - **Functional Requirements:**
-  - Users should be able to create, read, update, and delete tasks and Time Tables.
+  - Users should be able to create, read, update, and delete tasks and time tables.
   - Users should be able to start and stop focus modes.
   - Users should be able to create and manage playlists and songs.
   - The bot should provide reminders and notifications for tasks and focus modes.
