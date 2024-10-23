@@ -48,6 +48,7 @@ class Database:
                 cur.execute(query, args)
             Database.commit()
         except Exception as exc:
+            Database.establish_connection()
             error(f"exc: {exc}\nquery: {query}\nargs: {args}", exc_info=True)
 
     @staticmethod
