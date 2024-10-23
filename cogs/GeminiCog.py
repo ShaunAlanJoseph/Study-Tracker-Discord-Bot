@@ -64,7 +64,7 @@ Music Commands
   An attachment containing an audio file(mp3) should be sent with the message
 - $get_song {song_id}  
   Retrieves a song by ID. Takes one argument: song_id.
-- $create_playlist {playlist name}  
+- $create_playlist {playlist_name}  
   Creates a new playlist. Takes the name of the playlist.
 - $get_playlist {playlist_id}  
   Retrieves a playlist by ID. Takes one argument: playlist_id.
