@@ -11,6 +11,7 @@ def main():
             Database.execute_query(query)
     
     # Create Relations
+    #Create Tables
     
     query = ("CREATE TABLE Users("
              "user_id BIGINT PRIMARY KEY,"
