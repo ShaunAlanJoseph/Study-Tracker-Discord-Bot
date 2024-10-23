@@ -12,11 +12,11 @@ The objective of the Study Tracker Discord Bot is to help users manage their stu
 
 ### System Specification:
 - **Functional Requirements:**
-  - Users should be able to create, read, update, and delete tasks.
+  - Users should be able to create, read, update, and delete tasks and Time Tables.
   - Users should be able to start and stop focus modes.
   - Users should be able to create and manage playlists and songs.
   - The bot should provide reminders and notifications for tasks and focus modes.
-  - The bot should maintain a history of completed tasks and focus sessions.
+  - The bot should maintain a history of completed tasks, time tables and focus sessions.
 
 - **Non-Functional Requirements:**
   - **Performance:** The system should handle multiple users and concurrent operations efficiently.
@@ -26,6 +26,7 @@ The objective of the Study Tracker Discord Bot is to help users manage their stu
 - **Types of Data:**
   - User information (user_id, username, join_date)
   - Tasks (task_id, user_id, name, description, status, due_date, completion_time)
+  - Time_Table (tt_id, user_id, name, description, days, time, duration, ping, active)
   - Focus modes (user_id, start, duration, status)
   - Playlists (playlist_id, user_id)
   - Songs (song_id, bytes, artist)
@@ -38,7 +39,7 @@ The objective of the Study Tracker Discord Bot is to help users manage their stu
 
 - **Constraints:**
   - Primary keys and foreign keys to maintain data integrity.
-  - Unique constraints on user_id, task_id, playlist_id, and song_id.
+  - Unique constraints on user_id, task_id, playlist_id, and song_id,tt_id.
 
 ## 3. Database Design
 
