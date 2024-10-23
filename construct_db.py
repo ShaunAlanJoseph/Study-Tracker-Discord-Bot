@@ -30,7 +30,8 @@ def main():
          "description TEXT,"
          "status VARCHAR(32),"
          "due_date BIGINT,"
-         "completion_time BIGINT"
+         "completion_time BIGINT,"
+         "FOREIGN KEY (user_id) REFERENCES Users(user_id)"
          ")")
     
     Database.execute_query(query)

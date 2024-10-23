@@ -62,33 +62,26 @@ class Task:
         return tasks
     
     def mark_as_done(self):
-        query = ("UPDATE Tasks SET status='done' WHERE task_id=%s")
-        Database.execute_query(query, self.task_id)
+        query = ("UPDATE Tasks SET status='done' WHERE task_id=%s and self.user_id=%s")
+        Database.execute_query(query, self.task_id, self.user_id)
         completion_time = get_time()
-        query = ("UPDATE Tasks SET completion_time=%s WHERE task_id=%s")
-        Database.execute_query(query, completion_time, self.task_id)
+        query = ("UPDATE Tasks SET completion_time=%s WHERE task_id=%s and self.user_id=%s")
+        Database.execute_query(query, completion_time, self.task_id, self.user_id)
 
     def mark_as_started(self):
-        query = ("UPDATE Tasks SET status='started' WHERE task_id=%s")
-        Database.execute_query(query, self.task_id)
+        query = ("UPDATE Tasks SET status='started' WHERE task_id=%s and self.user_id=%s")
+        Database.execute_query(query, self.task_id, self.user_id)
 
     def delete_task(self):
-        try:
-            query = ("DELETE FROM Tasks WHERE task_id=%s")
-            Database.execute_query(query, self.task_id)
-        except Exception as e:
-            print(f"Task id: {self.task_id} not found")
-            print("Sql query failed")
-            print(e)
-            return False
+        query = ("DELETE FROM Tasks WHERE task_id=%s and user_id=%s")
+        Database.execute_query(query, self.task_id, self.user_id)
+ 
 
 
 async def list_tasks():
     tasks = Task().list_tasks()
-    print(tasks)
     embed = BaseEmbed(title="Tasks")
     for task in tasks:
-        print(task)
         embed.add_field(
             name=task[2],
             value=(
@@ -101,26 +94,47 @@ async def list_tasks():
         )
     await send_message(embed=embed)
 
-async def add_task(name):
-    Task(name=name).add_task()
+async def add_task(name:str):
+    try:
+        query = ("SELECT user_id FROM Users WHERE user_id=%s")
+        Database.fetch_one(query, ctx_mgr().get_context_user_id())
+        Task(name=name).add_task()
+        await send_message(content="Task added successfully")
+    except Exception as e:
+        await send_message(content="Task addition failed.Please register first")
 
 async def remove_task(task_id):
-    Task(task_id=task_id).delete_task()
+    try:
+        Task(task_id=task_id).delete_task()
+        await send_message(content="Task removed successfully")
+    except Exception as e:
+        await send_message(content="Task removal failed. Task not found")
 
 async def add_description(task_id, description):
     query = ("UPDATE Tasks SET description=%s WHERE task_id=%s")
     Database.execute_query(query, description, task_id)
 
 async def mark_as_done(task_id):
-    Task(task_id=task_id).mark_as_done()
+    try:
+        Task(task_id=task_id).mark_as_done()
+        await send_message(content="Task marked as done")
+    except Exception as e:
+        await send_message("Task not found")
 
 async def mark_as_started(task_id):
-    Task(task_id=task_id).mark_as_started()
+    try:
+        Task(task_id=task_id).mark_as_started()
+        await send_message(content="Task marked as started")
+    except Exception as e:
+        await send_message(content="Task not found")
 
 async def set_due_date(task_id:int, due_date:str):
-    due_date = date_to_epoch(due_date)
-    query = ("UPDATE Tasks SET due_date=%s WHERE task_id=%s")
-    Database.execute_query(query, due_date, task_id)
+    try:
+        due_date = date_to_epoch(due_date)
+        query = ("UPDATE Tasks SET due_date=%s WHERE task_id=%s")
+        Database.execute_query(query, due_date, task_id)
+    except Exception as e:
+        await send_message(content="Task not found")
     
  
     
