@@ -103,15 +103,18 @@ Convert the ER diagram into a relational schema:
   ```sql
   CREATE TABLE Users (
       user_id BIGINT PRIMARY KEY,
-      username VARCHAR(64) NOT NULL,
-      join_date BIGINT NOT NULL
+      name VARCHAR(64) NOT NULL,
+      join_date BIGINT NOT NULL,
+      dob BIGINT,
+      institution VARCHAR(256),
+      time_zone SMALLINT
   );
   ```
 
 - **Tasks**:
   ```sql
   CREATE TABLE Tasks (
-      task_id BIGINT PRIMARY KEY,
+      task_id SERIAL PRIMARY KEY,
       user_id BIGINT NOT NULL,
       name VARCHAR(128) NOT NULL,
       description TEXT,
@@ -122,23 +125,40 @@ Convert the ER diagram into a relational schema:
   );
   ```
 
-- **FocusMode**:
+- **Time_Table**:
   ```sql
-  CREATE TABLE FocusMode (
-      user_id BIGINT,
-      start BIGINT NOT NULL,
-      duration BIGINT,
-      status BOOLEAN,
-      PRIMARY KEY (user_id, start),
+  CREATE TABLE Time_Table (
+      tt_id VARCHAR(12) PRIMARY KEY,
+      user_id BIGINT NOT NULL,
+      name VARCHAR(128) NOT NULL,
+      description TEXT,
+      days SMALLINT NOT NULL,
+      time SMALLINT NOT NULL,
+      duration SMALLINT,
+      ping BOOLEAN NOT NULL,
+      active BOOLEAN NOT NULL,
       FOREIGN KEY (user_id) REFERENCES Users(user_id)
   );
   ```
 
-- **Playlist**:
+- **Time_Table_Status**:
   ```sql
-  CREATE TABLE Playlist (
-      playlist_id BIGINT PRIMARY KEY,
-      user_id BIGINT NOT NULL,
+  CREATE TABLE Time_Table_Status (
+      tt_id VARCHAR(12) NOT NULL,
+      time BIGINT NOT NULL,
+      status VARCHAR(32),
+      PRIMARY KEY (tt_id, time),
+      FOREIGN KEY (tt_id) REFERENCES Time_Table(tt_id)
+  );
+  ```
+
+- **Focus_Mode**:
+  ```sql
+  CREATE TABLE Focus_Mode (
+      user_id BIGINT,
+      start_time BIGINT NOT NULL,
+      duration BIGINT NOT NULL,
+      PRIMARY KEY (user_id, start_time),
       FOREIGN KEY (user_id) REFERENCES Users(user_id)
   );
   ```
@@ -146,39 +166,96 @@ Convert the ER diagram into a relational schema:
 - **Songs**:
   ```sql
   CREATE TABLE Songs (
-      song_id BIGINT PRIMARY KEY,
-      bytes BLOB NOT NULL,
-      artist VARCHAR(128)
-  );
-  ```
-
-- **CardSet**:
-  ```sql
-  CREATE TABLE CardSet (
-      card_set_id BIGINT PRIMARY KEY,
+      song_id VARCHAR(12) PRIMARY KEY,
       user_id BIGINT NOT NULL,
+      name VARCHAR(128) NOT NULL,
+      bytes BYTEA NOT NULL,
+      artist VARCHAR(64) NOT NULL,
       FOREIGN KEY (user_id) REFERENCES Users(user_id)
   );
   ```
 
-- **Cards**:
+- **Playlist**:
   ```sql
-  CREATE TABLE Cards (
-      card_id BIGINT PRIMARY KEY,
-      question TEXT,
-      answer TEXT,
-      card_type VARCHAR(64)
+  CREATE TABLE Playlist (
+      playlist_id VARCHAR(12) PRIMARY KEY,
+      user_id BIGINT NOT NULL,
+      name VARCHAR(128) NOT NULL,
+      FOREIGN KEY (user_id) REFERENCES Users(user_id)
   );
   ```
 
-- **DropdownCards**:
+- **Playlist_Songs**:
   ```sql
-  CREATE TABLE DropdownCards (
-      card_id BIGINT PRIMARY KEY,
-      option VARCHAR(256),
-      FOREIGN KEY (card_id) REFERENCES Cards(card_id)
+  CREATE TABLE Playlist_Songs (
+      playlist_id VARCHAR(12),
+      song_id VARCHAR(12),
+      PRIMARY KEY (playlist_id, song_id),
+      FOREIGN KEY (playlist_id) REFERENCES Playlist(playlist_id),
+      FOREIGN KEY (song_id) REFERENCES Songs(song_id)
   );
   ```
+
+- **Flashcard**:
+  ```sql
+  CREATE TABLE Flashcard (
+      card_id VARCHAR(12) PRIMARY KEY,
+      user_id BIGINT NOT NULL,
+      question TEXT NOT NULL,
+      options TEXT[],
+      answer TEXT,
+      image BYTEA,
+      FOREIGN KEY (user_id) REFERENCES Users(user_id)
+  );
+  ```
+
+- **Flashcard_Set**:
+  ```sql
+  CREATE TABLE Flashcard_Set (
+      card_set_id VARCHAR(12) PRIMARY KEY,
+      name VARCHAR(128) NOT NULL,
+      owner BIGINT NOT NULL,
+      description TEXT,
+      FOREIGN KEY (owner) REFERENCES Users(user_id)
+  );
+  ```
+
+- **Flashcard_set_access**:
+  ```sql
+  CREATE TABLE Flashcard_set_access (
+      card_set_id VARCHAR(12),
+      user_id BIGINT,
+      PRIMARY KEY (card_set_id, user_id),
+      FOREIGN KEY (card_set_id) REFERENCES Flashcard_Set(card_set_id),
+      FOREIGN KEY (user_id) REFERENCES Users(user_id)
+  );
+  ```
+
+- **Flashcard_Set_Cards**:
+  ```sql
+  CREATE TABLE Flashcard_Set_Cards (
+      card_set_id VARCHAR(12),
+      card_id VARCHAR(12),
+      added_by BIGINT NOT NULL,
+      PRIMARY KEY (card_set_id, card_id),
+      FOREIGN KEY (card_set_id) REFERENCES Flashcard_Set(card_set_id),
+      FOREIGN KEY (card_id) REFERENCES Flashcard(card_id)
+  );
+  ```
+
+- **Flashcard_History**:
+  ```sql
+  CREATE TABLE Flashcard_History (
+      card_id VARCHAR(12),
+      user_id BIGINT,
+      time BIGINT,
+      correct BOOLEAN,
+      PRIMARY KEY (card_id, user_id, time),
+      FOREIGN KEY (card_id) REFERENCES Flashcard(card_id),
+      FOREIGN KEY (user_id) REFERENCES Users(user_id)
+  );
+  ```
+
 
 ### Normalization:
 The database is normalized up to the third normal form (3NF) to reduce redundancy and improve integrity.
@@ -189,7 +266,8 @@ The database is normalized up to the third normal form (3NF) to reduce redundanc
 The database and tables are created using SQL queries as shown in the logical design section.
 
 ### Coding:
- SQL queries for CRUD operations. Example for tasks:
+
+### Tasks
 ```sql
 -- Create
 INSERT INTO Tasks (task_id, user_id, name, description, status, due_date, completion_time) VALUES (?, ?, ?, ?, ?, ?, ?);
@@ -203,6 +281,71 @@ UPDATE Tasks SET name = ?, description = ?, status = ?, due_date = ?, completion
 -- Delete
 DELETE FROM Tasks WHERE task_id = ?;
 ```
+
+### Time Tables
+
+```sql
+-- Create
+INSERT INTO TimeTables (tt_id, name, time, days, duration, description) VALUES (?, ?, ?, ?, ?, ?);
+
+-- Read
+SELECT * FROM TimeTables WHERE tt_id = ?;
+
+-- Update
+UPDATE TimeTables SET name = ?, time = ?, days = ?, duration = ?, description = ? WHERE tt_id = ?;
+
+-- Delete
+DELETE FROM TimeTables WHERE tt_id = ?;
+```
+
+### Songs
+
+```sql
+-- Create
+INSERT INTO Songs (song_id, name, artist, audio_file) VALUES (?, ?, ?, ?);
+
+-- Read
+SELECT * FROM Songs WHERE song_id = ?;
+
+-- Update
+UPDATE Songs SET name = ?, artist = ?, audio_file = ? WHERE song_id = ?;
+
+-- Delete
+DELETE FROM Songs WHERE song_id = ?;
+```
+
+### Flash Cards
+
+```sql
+-- Create
+INSERT INTO FlashCards (card_id, question, answer, option1, option2, option3) VALUES (?, ?, ?, ?, ?, ?);
+
+-- Read
+SELECT * FROM FlashCards WHERE card_id = ?;
+
+-- Update
+UPDATE FlashCards SET question = ?, answer = ?, option1 = ?, option2 = ?, option3 = ? WHERE card_id = ?;
+
+-- Delete
+DELETE FROM FlashCards WHERE card_id = ?;
+```
+### User Registration
+
+```sql
+-- Create
+INSERT INTO Users (user_id, name, institution, dob) VALUES (?, ?, ?, ?);
+
+-- Read
+SELECT * FROM Users WHERE user_id = ?;
+
+-- Update
+UPDATE Users SET name = ?, institution = ?, dob = ? WHERE user_id = ?;
+
+-- Delete
+DELETE FROM Users WHERE user_id = ?;
+```
+
+
 However in this project these operations are performed internally by discord through the python functions we have written
 
  
@@ -318,95 +461,361 @@ python bot.py
 - Command prefix is $
 - Write !help to ask Gemini AI for help regarding any of the commands .Alternatively you can use $help to see a list of available commands
 
+
+### Study Tracker Commands
+
 ```
+Below is the list of available commands
+
 Study Tracker Commands
 
-List of available commands and their usage
+Flashcard Commands
 
-$ping
+- $add_flashcard
 
-Responds with 'Pong!' and alternates messages.
+    {message}
 
-$add_flashcard
+  Adds a new flashcard. Message format should be
 
-Adds a new flashcard.
+# Q: <question 256 chars>
 
-$list_flashcards
+## A: <answer 256 chars>
 
-Lists all flashcards.
+- <option1 256 chars>
 
-$flashcard_flash
+- <option2 256 chars>
 
-Flashes a specific flashcard by ID.
+- <option3>
 
-$add_task
+  
 
-Adds a new task with a specified name.
+- $list_flashcards  
 
-$set_task
+  Lists all flashcards. No arguments required.
 
-Sets the current task by name.
+- $flashcard_flash {card_id}  
 
-$set_task_by_id
+  Flashes a specific flashcard by ID. Takes one argument: card_id.
 
-Sets the current task by ID.
+- $flashcard_create_set {set_name}
 
-$add_description
+  Creates a new flashcard set. Takes one argument: <set_name>
 
-Adds a description to the current task.
+- $flashcard_add_to_set {set_id} {card_id}
 
-$list_tasks
+  Adds a flashcard to a set by ID. Takes two arguments: set_id, card_id.
 
-Lists all tasks.
+- $flashcard_remove_from_set {set_id} {card_id}
 
-$remove_task
+  Removes a flashcard from a set by ID. Takes two arguments: set_id, card_id.
 
-Removes a task by name.
+- $flashcard_review_set {set_id}
 
-$delete_task
+  Reviews a flashcard set by ID. Takes one argument: set_id.
 
-Deletes a task by ID.
+  
 
-$mark_as_done
+Task Management Commands
 
-Marks a task as done by name.
+- $add_task {name}  
 
-$mark_as_started
+  Adds a new task with a specified name. Takes one argument: name.
 
-Marks a task as started by name.
+- $set_task {name}  
 
-$mark_as_started_by_id
+  Sets the current task by name. Takes one argument: name.
 
-Marks a task as started by ID.
+- $set_task_by_id {id}  
 
-$mark_as_done_by_id
+  Sets the current task by ID. Takes one argument: id.
 
-Marks a task as done by ID.
+- $add_description {description}  
 
-$set_due_date
+  Adds a description to the current task. Takes one argument: description.
 
-Sets a due date for the current task.Format should be YYYY-MM-DD HH:MM:SS.
+- $list_tasks  
 
-$query
+  Lists all tasks. No arguments required.
 
-Queries the Gemini API with your question and returns a response.
+- $remove_task {name}  
 
-$pm
+  Removes a task by name. Takes one argument: name.
 
-Sends a private message to you asking how the bot can help and you can talk to it.
+- $delete_task {id}  
 
-$gemini enable
+  Deletes a task by ID. Takes one argument: id.Also called task number
 
-Enables Gemini to respond to every message in the server.
+- $mark_as_done {name}  
 
-$gemini disable
+  Marks a task as done by name. Takes one argument: name.
 
-Disables Gemini from responding to every message in the server.
+- $mark_as_started {name}  
 
-!help <question> to ask a question related to the commands to the bot. 
+  Marks a task as started by name. Takes one argument: name.
 
+- $mark_as_started_by_id {id}  
+
+  Marks a task as started by ID. Takes one argument: id.
+
+- $mark_as_done_by_id {id}  
+
+  Marks a task as done by ID. Takes one argument: id.
+
+- $set_due_date {due_date}  
+
+  Sets a due date for the current task. Takes one argument: due_date (format: YYYY-MM-DD HH:MM:SS).
+
+  
+
+Music Commands
+
+- $add_song {message}  
+
+  Adds a new song. Message format should be 'Song Name by Artist.
+
+  For example: despacito by justin bieber
+
+  An attachment containing an audio file(mp3) should be sent with the message
+
+- $get_song {song_id}  
+
+  Retrieves a song by ID. Takes one argument: song_id.
+
+- $create_playlist {playlist name}  
+
+  Creates a new playlist. Takes the name of the playlist.
+
+- $get_playlist {playlist_id}  
+
+  Retrieves a playlist by ID. Takes one argument: playlist_id.
+
+- $add_song_to_playlist {playlist_id} {song_id}  
+
+  Adds a song to a playlist by song ID and playlist ID. Takes two arguments: playlist_id, song_id.
+
+- $remove_song_from_playlist {playlist_id} {song_id}  
+
+  Removes a song from a playlist by song ID and playlist ID. Takes two arguments: playlist_id, song_id.
+
+- $play_playlist {playlist_id}  
+
+  Plays a playlist by ID. Takes one argument: playlist_id.
+
+  
+
+Time Table Management Commands
+
+- $create_time_table_entry {message}
+
+  Adds a new time table entry. Message format should be
+
+  # name: <name>
+
+  ## time: <time>
+
+  ## days: <days>
+
+  ## duration: <duration>(an integer in minutes)
+
+  - description: <description>
+
+-$delete_time_table_entry {tt_id}
+
+  Removes a time table entry by ID. Takes one argument: tt_id.
+
+  
+  
+
+General Purpose Commands
+
+- $ping  
+
+  Responds with 'Pong!' and alternates messages. No arguments required.
+
+- $query {question}  
+
+  Queries the Gemini API with your question and returns a response. Takes one argument: question.
+
+- $pm  
+
+  Sends a private message to you asking how the bot can help and you can talk to it. No arguments required.
+
+- $gemini enable  
+
+  Enables Gemini to respond to every message in the server. No arguments required.
+
+- $gemini disable  
+
+  Disables Gemini from responding to every message in the server. No arguments required.
+
+- $register {name}  
+
+  Registers a new user. Takes the name of the user
+
+- $set_institution {institution}
+
+  Sets the institution of the user. Takes the name of the institution
+
+- $set_dob {dob}
+
+  Sets the date of birth of the user. Takes the date of birth in the format DD MM YYYY
+
+- !help {question}  
+
+  To ask a question related to the commands to the bot. Takes one optional argument: question.
 ```
+
+## 7) Documentation
+
+**Below is our GitHub commit history documenting the process of our work**.
+
+**You can also find all the information about our project at** https://github.com/ShaunAlanJoseph/Study-Tracker-Discord-Bot
+
+### Commits on Sep 9, 2024
+
+- **Delete .vscode directory**  
+  *E-m-i-n-e-n-c-e authored on Sep 9*  
+  *Verified*
+
+- **Added .vscode to git ignore**  
+  *E-m-i-n-e-n-c-e committed on Sep 9*
+
+- **setup the bot**  
+  *ShaunAlanJoseph committed on Sep 9*
+
+### Commits on Sep 10, 2024
+
+- **added: queries for creating tables**  
+  *Venkat-jaswanth committed on Sep 10*
+
+- **added: utils**  
+  *ShaunAlanJoseph committed on Sep 10*
+
+- **added: construct_db.py**  
+  *ShaunAlanJoseph committed on Sep 10*
+
+- **Merge branch 'main' of https://github.com/ShaunAlanJoseph/Study-Tracker-Discord-Bot**  
+  *ShaunAlanJoseph committed on Sep 10*
+
+- **added: database class**  
+  *ShaunAlanJoseph committed on Sep 10*
+
+### Commits on Sep 11, 2024
+
+- **Update README.md**  
+  *E-m-i-n-e-n-c-e authored on Sep 11*  
+  *Verified*
+
+- **Merge branches 'main' and 'main' of https://github.com/ShaunAlanJoseph/Study-Tracker-Discord-Bot**  
+  *Venkat-jaswanth committed on Sep 11*
+
+- **update: table construction**  
+  *Venkat-jaswanth committed on Sep 11*
+
+- **Added image folder and er img>**  
+  *E-m-i-n-e-n-c-e committed on Sep 11*
+
+- **Update README.md**  
+  *E-m-i-n-e-n-c-e authored on Sep 11*  
+  *Verified*
+
+- **Update README.md**  
+  *E-m-i-n-e-n-c-e authored on Sep 11*  
+  *Verified*
+
+### Commits on Oct 1, 2024
+
+- **Merge branch 'main' of https://github.com/ShaunAlanJoseph/Study-Tracker-Discord-Bot**  
+  *E-m-i-n-e-n-c-e committed 3 weeks ago*
+
+- **a**  
+  *E-m-i-n-e-n-c-e committed 3 weeks ago*
+
+### Commits on Oct 14, 2024
+
+- **The bot now retries the prompt if there is a server side error from gemini**  
+  *E-m-i-n-e-n-c-e committed last week*
+
+- **Added GeminiCog**  
+  *E-m-i-n-e-n-c-e committed last week*
+
+- **added send_message**  
+  *ShaunAlanJoseph committed last week*
+
+- **added context_manager**  
+  *ShaunAlanJoseph committed last week*
+
+### Commits on Oct 15, 2024
+
+- **Merge branch 'main' of https://github.com/ShaunAlanJoseph/Study-Tracker-Discord-Bot**  
+  *ShaunAlanJoseph committed last week*
+
+- **added BaseView**  
+  *ShaunAlanJoseph committed last week*
+
+### Commits on Oct 16, 2024
+
+- **Added Tasks**  
+  *E-m-i-n-e-n-c-e committed last week*
+
+- **added flashcards**  
+  *ShaunAlanJoseph committed last week*
+
+### Commits on Oct 17, 2024
+
+- **Fixed another error**  
+  *E-m-i-n-e-n-c-e committed last week*
+
+- **Fixed a small error**  
+  *E-m-i-n-e-n-c-e committed last week*
+
+### Commits on Oct 18, 2024
+
+- **More gemini stuff**  
+  *E-m-i-n-e-n-c-e committed 5 days ago*
+
+### Commits on Oct 22, 2024
+
+- **Merge branch 'main' of https://github.com/ShaunAlanJoseph/Study-Tracker-Discord-Bot**  
+  *ShaunAlanJoseph committed 12 hours ago*
+
+- **added time table**  
+  *ShaunAlanJoseph committed 12 hours ago*
+
+- **a**  
+  *E-m-i-n-e-n-c-e committed 16 hours ago*
+
+- **Merge branch 'main' of https://github.com/ShaunAlanJoseph/Study-Tracker-Discord-Bot**  
+  *ShaunAlanJoseph committed 17 hours ago*
+
+- **added songs**  
+  *ShaunAlanJoseph committed 17 hours ago*
+
+- **Update README.md**  
+  *E-m-i-n-e-n-c-e authored 18 hours ago*  
+  *Verified*
+
+- **added flashcard sets**  
+  *ShaunAlanJoseph committed 18 hours ago*
+
+- **Merge branch 'main' of https://github.com/ShaunAlanJoseph/Study-Tracker-Discord-Bot**  
+  *ShaunAlanJoseph committed yesterday*
+
+- **added flashcards**  
+  *ShaunAlanJoseph committed yesterday*
+
+### Commits on Oct 23, 2024
+
+- **Added more commands to the AI's context**  
+  *E-m-i-n-e-n-c-e committed 9 hours ago*
+
+- **Merge**  
+  *E-m-i-n-e-n-c-e committed 9 hours ago*
+
+- **Some error handling + Updated Gemini's context to include the new commands**  
+  *E-m-i-n-e-n-c-e committed 9 hours ago*
+
 
 
 -----------------------------------------------**THE END**----------------------------------------------------
-  
+
