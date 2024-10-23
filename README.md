@@ -1,5 +1,7 @@
 # Study Tracker Discord Bot
 
+ **GitHub Repo Link** : https://github.com/ShaunAlanJoseph/Study-Tracker-Discord-Bot
+
 ## 1. Project Planning
 
 ### Project Title:
