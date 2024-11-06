@@ -62,14 +62,14 @@ class Task:
         return tasks
     
     def mark_as_done(self):
-        query = ("UPDATE Tasks SET status='done' WHERE task_id=%s and self.user_id=%s")
+        query = ("UPDATE Tasks SET status='done' WHERE task_id=%s and user_id=%s")
         Database.execute_query(query, self.task_id, self.user_id)
         completion_time = get_time()
-        query = ("UPDATE Tasks SET completion_time=%s WHERE task_id=%s and self.user_id=%s")
+        query = ("UPDATE Tasks SET completion_time=%s WHERE task_id=%s and user_id=%s")
         Database.execute_query(query, completion_time, self.task_id, self.user_id)
 
     def mark_as_started(self):
-        query = ("UPDATE Tasks SET status='started' WHERE task_id=%s and self.user_id=%s")
+        query = ("UPDATE Tasks SET status='started' WHERE task_id=%s and user_id=%s")
         Database.execute_query(query, self.task_id, self.user_id)
 
     def delete_task(self):
